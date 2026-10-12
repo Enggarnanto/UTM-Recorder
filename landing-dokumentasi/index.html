@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#14213D">
+  <meta name="description" content="Dokumentasi UTM Traffic Recorder: rekam trafik dan UTM, kelola CTA WhatsApp, pahami penyimpanan data, dan mulai setup di WordPress.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="UTM Traffic Recorder — Dokumentasi & Panduan">
+  <meta property="og:description" content="Dari instalasi, fitur, dan CTA WhatsApp sampai cara data dicatat dan batasannya.">
+  <title>UTM Traffic Recorder — Dokumentasi & Panduan | MTalkBlog</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--navy:#14213D;--blue:#2563EB;--lime:#B9F227;--sky:#38BDF8;--soft:#EFF6FF;--off:#F8FAFC;--slate:#64748B;--ink:#1E293B;--white:#FFF;--line:#DDE6F1;--shadow:0 18px 60px rgba(20,33,61,.085);--radius:22px}
+    *,*::before,*::after{box-sizing:border-box}
+    html{scroll-behavior:smooth;scroll-padding-top:92px}
+    body{margin:0;background:var(--off);color:var(--ink);font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased}
+    button,input{font:inherit}
+    button{cursor:pointer}
+    a{color:var(--blue);text-decoration:none}
+    a:hover{text-decoration:underline}
+    img,svg{max-width:100%}
+    ::selection{background:var(--lime);color:var(--navy)}
+    :focus-visible{outline:3px solid var(--sky);outline-offset:3px}
+    .skip-link{position:absolute;top:-100px;left:12px;z-index:1000;background:var(--navy);color:#fff;padding:10px 16px;border-radius:10px}
+    .skip-link:focus{top:12px}
+    .container{width:min(1160px,calc(100% - 40px));margin-inline:auto}
+    .section{padding:100px 0}
+    .section-head{max-width:740px;margin-bottom:38px}
+    .eyebrow{display:inline-flex;align-items:center;gap:9px;color:var(--blue);font-size:.77rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+    .eyebrow::before{content:"";height:8px;width:8px;background:var(--lime);border-radius:2px;transform:rotate(45deg)}
+    h1,h2,h3,h4{font-family:Sora,system-ui,sans-serif;color:var(--navy);line-height:1.17;letter-spacing:-.035em}
+    h1{font-size:clamp(2.7rem,6vw,5rem);margin:20px 0 22px}
+    h2{font-size:clamp(2.1rem,4vw,3.2rem);margin:16px 0}
+    h3{font-size:1.19rem;margin:0 0 10px}
+    p{margin:0 0 18px}
+    .muted{color:var(--slate)}
+    .lead{font-size:1.08rem;color:#526176;max-width:660px}
+    .small{font-size:.83rem}
+    .button{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:12px 19px;border:1px solid transparent;border-radius:12px;font-size:.88rem;font-weight:800;line-height:1.2;transition:transform .2s,box-shadow .2s,background .2s;text-decoration:none!important}
+    .button:hover{transform:translateY(-2px)}
+    .button-primary{background:var(--blue);color:#fff;box-shadow:0 12px 26px rgba(37,99,235,.22)}
+    .button-primary:hover{background:#174ed0}
+    .button-light{background:#fff;color:var(--navy);border-color:var(--line)}
+    .button-ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.4)}
+    .button-ghost:hover{background:rgba(255,255,255,.1)}
+    .topbar{position:sticky;top:0;z-index:50;background:rgba(248,250,252,.94);backdrop-filter:blur(18px);border-bottom:1px solid rgba(221,230,241,.8)}
+    .nav-inner{min-height:75px;display:flex;align-items:center;gap:24px}
+    .brand{display:flex;align-items:center;gap:11px;color:var(--navy);font-family:Sora,system-ui,sans-serif;font-weight:800;letter-spacing:-.045em;white-space:nowrap}
+    .brand:hover{text-decoration:none}
+    .brand-mark{width:39px;height:39px;display:grid;place-items:center;background:var(--navy);border-radius:12px}
+    .brand-mark svg{width:25px;height:25px}
+    .brand span span{color:var(--blue)}
+    .nav-links{display:flex;align-items:center;gap:26px;margin-left:auto}
+    .nav-links a{font-size:.8rem;color:#43536a;font-weight:700;white-space:nowrap}
+    .nav-links a[aria-current="location"],.nav-links a:hover{color:var(--blue);text-decoration:none}
+    .nav-cta{margin-left:10px;min-height:39px;padding:9px 13px;font-size:.75rem}
+    .menu-toggle{display:none;margin-left:auto;width:42px;height:42px;background:#fff;border:1px solid var(--line);border-radius:10px;color:var(--navy)}
+    .menu-toggle svg{width:20px;vertical-align:middle}
+    .progress{position:absolute;left:0;bottom:-1px;height:2px;width:100%;transform:scaleX(0);transform-origin:left;background:var(--blue)}
+    .hero{position:relative;overflow:hidden;padding:88px 0 104px;background:radial-gradient(circle at 80% 14%,#dbecff 0,transparent 36%),linear-gradient(135deg,#fff 15%,#f0f7ff 100%)}
+    .hero::after{content:"";position:absolute;right:-110px;bottom:-230px;width:500px;height:500px;border:1px solid #cfdef0;border-radius:50%;box-shadow:0 0 0 70px rgba(221,236,255,.3),0 0 0 140px rgba(221,236,255,.2);pointer-events:none}
+    .hero-grid{position:relative;z-index:1;display:grid;grid-template-columns:1.04fr .96fr;align-items:center;gap:60px}
+    .hero-copy{max-width:640px}
+    .hero h1 em{font-style:normal;color:var(--blue)}
+    .hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin:31px 0 36px}
+    .hero-meta{display:flex;align-items:center;flex-wrap:wrap;gap:10px;color:var(--slate);font-size:.78rem;font-weight:700}
+    .hero-meta b{color:var(--navy)}
+    .dot{height:4px;width:4px;background:#abb9ca;border-radius:50%}
+    .version{display:inline-flex;padding:6px 10px;border-radius:100px;background:#e1f7ab;color:#344b06;font-size:.68rem;font-weight:800;letter-spacing:.03em}
+    .dashboard-art{position:relative;background:#fff;border:1px solid #e3ebf7;border-radius:23px;box-shadow:0 30px 90px rgba(20,33,61,.16);padding:17px;transform:rotate(1deg)}
+    .dashboard-art::before{content:"";position:absolute;inset:15px -16px -15px 16px;z-index:-1;border:2px solid #b9d4ff;border-radius:23px;transform:rotate(3deg)}
+    .art-top{display:flex;align-items:center;gap:7px;border-bottom:1px solid #e8eef7;padding:0 0 14px}
+    .art-top i{display:block;width:7px;height:7px;border-radius:50%;background:#cbd5e1}
+    .art-top span{margin-left:12px;font-size:.66rem;color:#607089;font-weight:800}
+    .art-body{display:grid;grid-template-columns:95px 1fr;min-height:345px}
+    .art-side{border-right:1px solid #e8eef7;padding:17px 7px 0 0}
+    .art-side span{display:block;height:9px;background:#edf2f9;border-radius:6px;margin:0 5px 17px}
+    .art-side span:first-child{background:var(--blue);height:23px;margin:0 0 15px}
+    .art-main{padding:17px 0 0 17px}
+    .art-label{font-family:Sora,sans-serif;color:var(--navy);font-size:.73rem;font-weight:800;margin-bottom:15px}
+    .art-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .art-stat{padding:12px;border:1px solid #e9eef7;border-radius:9px}
+    .art-stat small{display:block;font-size:.54rem;color:#8290a4;font-weight:700}
+    .art-stat strong{display:block;margin-top:6px;font:700 1.1rem Sora;color:var(--navy)}
+    .art-stat .skeleton{width:60%;height:17px;margin-top:9px;border-radius:5px;background:#e1ebfa}
+    .art-chart{height:131px;margin-top:14px;padding:18px 15px 9px;display:flex;align-items:end;gap:8px;border:1px solid #e9eef7;border-radius:10px}
+    .art-chart i{flex:1;border-radius:5px 5px 0 0;background:#bdd4fb;min-height:15px}
+    .art-chart i:nth-child(3n){background:var(--blue)}
+    .art-chart i:last-child{background:var(--lime)}
+    .art-row{display:flex;align-items:center;gap:11px;padding:12px 3px;border-bottom:1px solid #eef2f7}
+    .art-row b{height:8px;width:29%;background:#e2eaf6;border-radius:9px}
+    .art-row span{height:8px;width:40%;background:#eef2f7;border-radius:9px}
+    .art-row i{margin-left:auto;height:8px;width:12%;background:#cee2ff;border-radius:9px}
+    .art-note{position:absolute;right:-24px;bottom:36px;background:var(--navy);color:#fff;border-radius:13px;padding:13px 16px;box-shadow:0 12px 24px rgba(20,33,61,.17);font-size:.72rem;font-weight:800;transform:rotate(-1deg)}
+    .art-note b{color:var(--lime)}
+    .quick-nav{position:relative;z-index:2;margin-top:-42px}
+    .quick-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:11px}
+    .quick-item{display:flex;align-items:center;gap:10px;padding:17px 14px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 25px rgba(20,33,61,.05);color:var(--navy);font-size:.76rem;font-weight:800;line-height:1.35}
+    .quick-item:hover{border-color:#aac9fb;text-decoration:none;transform:translateY(-2px)}
+    .quick-number{display:grid;place-items:center;flex:none;width:27px;height:27px;border-radius:8px;background:var(--soft);color:var(--blue);font-family:Sora,sans-serif;font-size:.66rem}
+    .feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:17px}
+    .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 7px 23px rgba(20,33,61,.035)}
+    .feature{padding:28px;min-height:218px}
+    .icon{display:grid;place-items:center;height:42px;width:42px;border-radius:12px;background:var(--soft);color:var(--blue);margin-bottom:21px}
+    .icon svg{height:21px;width:21px}
+    .feature p{font-size:.88rem;color:var(--slate);margin:0}
+    .feature:nth-child(2) .icon,.feature:nth-child(5) .icon{background:#edfad3;color:#54720b}
+    .feature:nth-child(3) .icon,.feature:nth-child(6) .icon{background:#e5f8ff;color:#087daa}
+    .dark-section{background:var(--navy);color:#d9e4f6;position:relative;overflow:hidden}
+    .dark-section::before{content:"";position:absolute;right:-180px;top:-150px;width:520px;height:520px;border:1px solid rgba(255,255,255,.1);border-radius:50%;box-shadow:0 0 0 100px rgba(255,255,255,.025),0 0 0 200px rgba(255,255,255,.018)}
+    .dark-section h2,.dark-section h3{color:#fff}
+    .dark-section .eyebrow{color:var(--lime)}
+    .dark-section .lead{color:#b8c9e2}
+    .flow{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-top:45px}
+    .flow-card{padding:23px;border:1px solid rgba(255,255,255,.15);border-radius:18px;background:rgba(255,255,255,.055)}
+    .flow-card .step{display:grid;place-items:center;width:31px;height:31px;border-radius:9px;background:var(--lime);color:var(--navy);font:800 .78rem Sora;margin-bottom:27px}
+    .flow-card p{font-size:.81rem;color:#b8c9e2;margin:0}
+    .flow-card h3{font-size:1rem}
+    .note-bar{display:flex;align-items:center;gap:15px;background:rgba(185,242,39,.1);border:1px solid rgba(185,242,39,.27);padding:17px 21px;margin-top:19px;border-radius:13px;font-size:.85rem}
+    .note-bar strong{color:var(--lime);white-space:nowrap}
+    .menu-layout{display:grid;grid-template-columns:260px 1fr;gap:22px}
+    .tab-list{display:flex;flex-direction:column;gap:7px}
+    .tab-list button{width:100%;border:1px solid transparent;background:transparent;color:#53657d;text-align:left;padding:14px 16px;border-radius:11px;font-weight:800;font-size:.82rem}
+    .tab-list button[aria-selected="true"]{background:var(--navy);color:#fff;box-shadow:0 8px 18px rgba(20,33,61,.13)}
+    .tab-panel{padding:34px;min-height:330px}
+    .tab-panel[hidden]{display:none}
+    .tab-panel h3{font-size:1.55rem}
+    .tab-panel p{color:var(--slate);max-width:650px}
+    .check-list{list-style:none;padding:0;margin:20px 0;display:grid;gap:13px}
+    .check-list li{display:flex;align-items:flex-start;gap:11px;font-size:.88rem}
+    .check-list li::before{content:"✓";flex:none;display:grid;place-items:center;width:22px;height:22px;border-radius:7px;background:#e8f8c8;color:#4a6602;font-size:.75rem;font-weight:900}
+    .micro-note{display:inline-block;background:var(--soft);border-radius:9px;color:#375384;font-size:.76rem;padding:10px 13px}
+    .setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:38px;align-items:start}
+    .steps{display:grid;gap:12px}
+    .setup-step{display:grid;grid-template-columns:35px 1fr;gap:15px;padding:20px 19px}
+    .setup-step .number{display:grid;place-items:center;width:35px;height:35px;border-radius:10px;background:var(--soft);color:var(--blue);font:800 .8rem Sora}
+    .setup-step h3{font-size:.99rem;margin:2px 0 6px}
+    .setup-step p{color:var(--slate);font-size:.82rem;margin:0}
+    .code-card{background:var(--navy);color:#e6efff;border-radius:var(--radius);padding:25px;box-shadow:var(--shadow)}
+    .code-card h3{color:#fff;margin-bottom:7px}
+    .code-card p{color:#b8c9e2;font-size:.83rem}
+    .code-label{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#9eb6d4;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;font-weight:800;margin:25px 0 8px}
+    .copy-button{border:1px solid rgba(255,255,255,.3);border-radius:7px;background:rgba(255,255,255,.08);color:#fff;font-size:.7rem;font-weight:800;padding:6px 9px}
+    .copy-button:hover{background:rgba(255,255,255,.17)}
+    pre{overflow:auto;margin:0;padding:17px;background:#203456;border:1px solid #344968;border-radius:10px;color:#d9f0ff;font-size:.79rem;line-height:1.7;white-space:pre-wrap;word-break:break-word}
+    code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace}
+    .code-card .tip{margin:19px 0 0;color:#d6e2f3;font-size:.78rem}
+    .inline-link{font-weight:800}
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center}
+    .mini-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .mini-card{padding:20px}
+    .mini-card b{display:block;color:var(--navy);font-size:.88rem;margin:0 0 7px}
+    .mini-card p{color:var(--slate);font-size:.77rem;margin:0}
+    .preview{padding:24px;background:#fff}
+    .preview-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:15px;border-bottom:1px solid var(--line)}
+    .preview-head strong{font-family:Sora,sans-serif;color:var(--navy);font-size:.9rem}
+    .segmented{display:flex;gap:3px;background:var(--soft);border-radius:9px;padding:3px}
+    .segmented button{border:0;background:transparent;border-radius:7px;padding:7px 10px;font-size:.7rem;font-weight:800;color:#61758d}
+    .segmented button[aria-pressed="true"]{background:var(--navy);color:#fff}
+    .chat-stage{background:#e9f2ed;border-radius:13px;padding:25px 18px;margin:18px 0}
+    .chat-bubble{max-width:370px;margin-left:auto;padding:14px 17px;background:#dcf8c6;border-radius:12px 12px 2px 12px;box-shadow:0 4px 8px rgba(20,33,61,.05);white-space:pre-line;font-size:.83rem}
+    .preview-foot{font-size:.75rem;color:var(--slate);margin:0}
+    .plain-band{padding:37px;border:1px solid #cde1fb;border-radius:var(--radius);background:linear-gradient(120deg,#f4f9ff,#fff);display:flex;justify-content:space-between;gap:26px;align-items:center}
+    .plain-band h3{margin-bottom:6px}
+    .plain-band p{max-width:690px;color:var(--slate);font-size:.84rem;margin:0}
+    .data-table-wrap{overflow:auto;background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+    table{width:100%;border-collapse:collapse;text-align:left}
+    th{background:#eaf3ff;color:var(--navy);font-size:.74rem;letter-spacing:.04em;text-transform:uppercase}
+    th,td{padding:17px 21px;border-bottom:1px solid #e9eef5;vertical-align:top}
+    td{font-size:.81rem;color:#526176}
+    td:first-child{font-weight:800;color:var(--navy);white-space:nowrap}
+    tbody tr:last-child td{border-bottom:0}
+    td code{font-size:.75rem;background:var(--soft);color:#23438b;border-radius:4px;padding:2px 4px}
+    .truth-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px;margin-top:20px}
+    .truth{padding:20px 21px;background:#fff;border:1px solid var(--line);border-radius:14px}
+    .truth b{display:block;color:var(--navy);font-size:.87rem;margin-bottom:5px}
+    .truth p{color:var(--slate);font-size:.78rem;margin:0}
+    .faq-list{display:grid;gap:10px;max-width:870px}
+    details{background:#fff;border:1px solid var(--line);border-radius:13px;padding:0 19px}
+    details[open]{border-color:#aac9fb;box-shadow:0 8px 22px rgba(20,33,61,.04)}
+    summary{display:flex;align-items:center;justify-content:space-between;gap:14px;list-style:none;cursor:pointer;padding:20px 0;color:var(--navy);font-weight:800;font-size:.88rem}
+    summary::-webkit-details-marker{display:none}
+    summary::after{content:"+";display:grid;place-items:center;flex:none;width:26px;height:26px;border-radius:7px;background:var(--soft);color:var(--blue);font-size:1.2rem;line-height:1}
+    details[open] summary::after{content:"−"}
+    details p{color:var(--slate);font-size:.82rem;padding:0 35px 20px 0;margin:0}
+    .cta-section{padding:70px 0;background:var(--navy)}
+    .cta-inner{display:flex;align-items:center;justify-content:space-between;gap:24px}
+    .cta-section h2{color:#fff;margin:9px 0 9px;font-size:clamp(1.7rem,3vw,2.5rem)}
+    .cta-section p{color:#b8c9e2;margin:0;font-size:.86rem}
+    .cta-actions{display:flex;gap:10px;flex-wrap:wrap}
+    footer{background:#101c34;color:#aabbd2;padding:36px 0}
+    .footer-inner{display:flex;align-items:center;justify-content:space-between;gap:22px}
+    footer a{color:#d9ebff}
+    footer .brand{color:#fff;font-size:.92rem}
+    footer p{font-size:.73rem;margin:7px 0 0}
+    .footer-links{display:flex;gap:18px;flex-wrap:wrap;font-size:.75rem;font-weight:700}
+    @media(max-width:1050px){.nav-links{gap:14px}.nav-links a{font-size:.74rem}.nav-cta{display:none}.hero-grid{gap:32px}.quick-grid{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:800px){.section{padding:72px 0}.nav-inner{min-height:65px}.menu-toggle{display:block}.nav-links{display:none;position:absolute;top:64px;left:0;right:0;margin:0;padding:15px 20px 22px;background:var(--off);border-bottom:1px solid var(--line);box-shadow:0 15px 25px rgba(20,33,61,.08);flex-direction:column;align-items:stretch;gap:4px}.nav-links.is-open{display:flex}.nav-links a{font-size:.84rem;padding:9px 6px}.hero{padding:66px 0 90px}.hero-grid{grid-template-columns:1fr}.hero-copy{max-width:650px}.dashboard-art{width:min(100%,510px);margin:10px auto 0}.feature-grid{grid-template-columns:repeat(2,1fr)}.flow{grid-template-columns:repeat(2,1fr)}.menu-layout{grid-template-columns:1fr}.tab-list{flex-direction:row;overflow-x:auto;padding-bottom:3px}.tab-list button{width:auto;white-space:nowrap}.setup-grid,.split{grid-template-columns:1fr}.cta-inner{align-items:flex-start;flex-direction:column}}
+    @media(max-width:560px){.container{width:min(100% - 30px,1160px)}h1{font-size:2.55rem}.hero{padding-top:53px}.hero-actions .button{width:100%}.dashboard-art{transform:none}.dashboard-art::before,.art-note{display:none}.quick-grid{grid-template-columns:1fr 1fr}.quick-item{padding:13px 11px;font-size:.7rem}.quick-item:last-child{grid-column:1/-1}.feature-grid,.flow,.mini-grid,.truth-grid{grid-template-columns:1fr}.feature{min-height:0}.section-head{margin-bottom:28px}.tab-panel{padding:23px}.plain-band{display:block;padding:25px}.plain-band .button{margin-top:17px}.preview-head{align-items:flex-start;flex-direction:column}.footer-inner{align-items:flex-start;flex-direction:column}.data-table-wrap{margin-inline:-15px;border-radius:0}th,td{padding:14px 13px;min-width:170px}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#konten">Lewati ke konten</a>
+  <header class="topbar">
+    <div class="container nav-inner">
+      <a class="brand" href="#atas" aria-label="UTM Traffic Recorder, ke atas">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M8 21.5c2.3 2.3 5.2 3.3 8.3 2.9 5-.7 8.4-4.4 8.4-9.1 0-4.8-3.2-8.4-8-8.4-4 0-6.5 2.1-6.5 5.2 0 2.9 2.3 4.2 6.5 4.5l3.1.2" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="m19 12 5.7-1.1L23.6 5" stroke="#B9F227" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span>UTM <span>Traffic</span> Recorder</span>
+      </a>
+      <button class="menu-toggle" id="menu-toggle" type="button" aria-label="Buka menu" aria-controls="main-nav" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <nav class="nav-links" id="main-nav" aria-label="Navigasi utama">
+        <a href="#fitur">Fitur</a><a href="#cara-kerja">Cara kerja</a><a href="#menu">Menu</a><a href="#setup">Setup</a><a href="#cta-wa">CTA WA</a><a href="#transparansi">Transparansi</a><a href="#faq">FAQ</a>
+      </nav>
+      <a class="button button-primary nav-cta" href="#setup">Mulai setup <span aria-hidden="true">↗</span></a>
+    </div>
+    <div class="progress" id="progress" aria-hidden="true"></div>
+  </header>
+  <main id="konten">
+    <section class="hero" id="atas">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">Dokumentasi plugin WordPress <span class="version">Versi 2.6.4</span></span>
+          <h1>Tahu asal trafik.<br><em>Pahami klik WhatsApp.</em></h1>
+          <p class="lead">Panduan lengkap UTM Traffic Recorder: dari memasang plugin dan mengatur CTA WhatsApp hingga memahami data yang tercatat, cara penyimpanannya, dan batas pengukurannya.</p>
+          <div class="hero-actions"><a class="button button-primary" href="#setup">Mulai dari setup <span aria-hidden="true">→</span></a><a class="button button-light" href="#transparansi">Lihat transparansi data</a></div>
+          <div class="hero-meta"><span>Oleh <b>Galih Enggarnanto</b></span><span class="dot"></span><span>WordPress 6.0+</span><span class="dot"></span><span>PHP 7.4+</span></div>
+        </div>
+        <div class="dashboard-art" role="img" aria-label="Ilustrasi dashboard trafik, grafik, dan tabel UTM; bukan data sungguhan">
+          <div class="art-top"><i></i><i></i><i></i><span>TRAFFIC RECORDER / OVERVIEW</span></div>
+          <div class="art-body"><div class="art-side"><span></span><span></span><span></span><span></span><span></span></div><div class="art-main"><div class="art-label">Dashboard Trafik &amp; UTM</div><div class="art-stats"><div class="art-stat"><small>ID Browser</small><div class="skeleton"></div></div><div class="art-stat"><small>Sesi Unik</small><div class="skeleton"></div></div><div class="art-stat"><small>Klik WA</small><div class="skeleton"></div></div></div><div class="art-chart"><i style="height:34%"></i><i style="height:56%"></i><i style="height:39%"></i><i style="height:74%"></i><i style="height:55%"></i><i style="height:82%"></i><i style="height:62%"></i><i style="height:91%"></i><i style="height:77%"></i><i style="height:100%"></i></div><div class="art-row"><b></b><span></span><i></i></div><div class="art-row"><b></b><span></span><i></i></div></div></div>
+          <div class="art-note"><b>●</b> Dari kunjungan ke percakapan</div>
+        </div>
+      </div>
+    </section>
+    <div class="quick-nav"><div class="container quick-grid"><a class="quick-item" href="#fitur"><span class="quick-number">01</span> Jelajahi fitur</a><a class="quick-item" href="#cara-kerja"><span class="quick-number">02</span> Pahami alur</a><a class="quick-item" href="#setup"><span class="quick-number">03</span> Pasang plugin</a><a class="quick-item" href="#cta-wa"><span class="quick-number">04</span> Atur WhatsApp</a><a class="quick-item" href="#transparansi"><span class="quick-number">05</span> Lihat data</a></div></div>
+    <section class="section" id="fitur"><div class="container"><div class="section-head"><span class="eyebrow">Yang bisa dilakukan</span><h2>Satu tempat untuk membaca perjalanan pengunjung.</h2><p class="lead">UTM Traffic Recorder menghubungkan kunjungan, atribusi kampanye, dan klik WhatsApp dalam dashboard WordPress.</p></div>
+      <div class="feature-grid">
+        <article class="card feature"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5m0 14h16M8 15l4-5 3 3 4-6"/></svg></span><h3>Dashboard trafik</h3><p>Lihat ID browser unik, sesi unik, pageviews, kunjungan ber-UTM, dan klik WhatsApp pada periode yang dipilih.</p></article>
+        <article class="card feature"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h6"/><circle cx="18" cy="15" r="3"/></svg></span><h3>UTM Manager</h3><p>Urai source, medium, campaign, content, term, dan match type. Filter kunjungan, lihat sesi, dan ekspor CSV.</p></article>
+        <article class="card feature"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v13H8l-4 3V4Z"/><path d="M8 9h8M8 13h5"/></svg></span><h3>Dashboard Chat WA</h3><p>Periksa jumlah klik, sesi yang mengklik, akun teratas, ID sesi, dan sumber tiap klik yang tercatat.</p></article>
+        <article class="card feature"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg></span><h3>CTA multiadmin</h3><p>Satu tombol mengambang membuka daftar admin. Atur avatar, jadwal, halaman, urutan, warna, ukuran, dan shortcode.</p></article>
+        <article class="card feature"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8h12M6 12h9M6 16h6"/><path d="M3 3h18v18H3z"/></svg></span><h3>Pesan bersumber</h3><p>Tambahkan baris sumber dari UTM dan ID terpilih. Saat tak ada UTM, gunakan URL halaman atau link khusus.</p></article>
+        <article class="card feature"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M7 4v6M4 17h16m-4-3v6"/></svg></span><h3>Kontrol sesuai kebutuhan</h3><p>Pilih UTM laporan, aktifkan pelacakan tautan WA lama, dan sembunyikan UTM dari address bar melalui Clean URL.</p></article>
+      </div>
+    </div></section>
+    <section class="section dark-section" id="cara-kerja"><div class="container"><div class="section-head"><span class="eyebrow">Cara kerja</span><h2>Dari tautan kampanye hingga laporan.</h2><p class="lead">Plugin berjalan di halaman publik, lalu mengirim peristiwa kunjungan dan klik yang valid ke WordPress.</p></div><div class="flow">
+      <article class="flow-card"><span class="step">01</span><h3>Pengunjung tiba</h3><p>Halaman dibuka dengan atau tanpa UTM. Parameter pada tautan baru dibaca saat halaman dimuat.</p></article>
+      <article class="flow-card"><span class="step">02</span><h3>Identitas lokal</h3><p>ID browser disimpan untuk domain itu; setiap tab memiliki ID sesi sendiri. UTM aktif diperbarui saat ada tautan UTM baru.</p></article>
+      <article class="flow-card"><span class="step">03</span><h3>Peristiwa tercatat</h3><p>Pageview dan klik WA yang valid dikirim ke database WordPress bersama ID serta kolom UTM laporan yang aktif.</p></article>
+      <article class="flow-card"><span class="step">04</span><h3>Laporan dibaca</h3><p>Dashboard menampilkan agregat, detail peristiwa, sesi terkait, dan ekspor data menurut filter.</p></article>
+    </div><div class="note-bar"><strong>UTM baru?</strong><span>Seluruh set UTM aktif diganti. Misalnya GADS + CPC lalu membuka tautan hanya dengan utm_source=EMAIL, medium berikutnya menjadi kosong.</span></div></div></section>
+    <section class="section" id="menu"><div class="container"><div class="section-head"><span class="eyebrow">Kenali menu</span><h2>Lima menu, alur yang jelas.</h2><p class="lead">Pilih menu untuk melihat fungsinya sebelum membuka dashboard WordPress.</p></div><div class="menu-layout">
+      <div class="tab-list" role="tablist" aria-label="Menu plugin"><button type="button" role="tab" id="tab-trafik" aria-controls="panel-trafik" aria-selected="true" tabindex="0">Dashboard Trafik &amp; UTM</button><button type="button" role="tab" id="tab-chat" aria-controls="panel-chat" aria-selected="false" tabindex="-1">Dashboard Chat WA</button><button type="button" role="tab" id="tab-manager" aria-controls="panel-manager" aria-selected="false" tabindex="-1">UTM Manager</button><button type="button" role="tab" id="tab-cta" aria-controls="panel-cta" aria-selected="false" tabindex="-1">CTA WA</button><button type="button" role="tab" id="tab-settings" aria-controls="panel-settings" aria-selected="false" tabindex="-1">Settings</button></div>
+      <div>
+        <section class="tab-panel card" id="panel-trafik" role="tabpanel" aria-labelledby="tab-trafik" tabindex="0"><span class="eyebrow">Gambaran utama</span><h3>Dashboard Trafik &amp; UTM</h3><p>Pantau performa kunjungan dalam satu layar, kemudian buka detail saat perlu mengetahui asal sesi atau klik tertentu.</p><ul class="check-list"><li>ID browser unik, sesi unik, pageviews, kunjungan dengan UTM, dan klik WA.</li><li>Ringkasan sumber UTM dan daftar klik WhatsApp terbaru.</li><li>Periode laporan mengikuti filter yang tersedia di dashboard.</li></ul><span class="micro-note">Satu browser dapat memiliki beberapa sesi; pageview bukan jumlah orang.</span></section>
+        <section class="tab-panel card" id="panel-chat" role="tabpanel" aria-labelledby="tab-chat" tabindex="0" hidden><span class="eyebrow">Klik WhatsApp</span><h3>Dashboard Chat WA</h3><p>Temukan akun atau nomor yang paling sering diklik berdasarkan sesi unik, lalu cocokkan klik dengan sumber dan ID sesinya.</p><ul class="check-list"><li>Total klik dan jumlah sesi unik yang melakukan klik.</li><li>Top akun atau nomor berdasarkan sesi unik.</li><li>Rincian source, medium, campaign, content, term, match type, dan baris sumber pesan.</li></ul><span class="micro-note">Klik tautan tidak membuktikan pesan sudah dikirim atau dibaca.</span></section>
+        <section class="tab-panel card" id="panel-manager" role="tabpanel" aria-labelledby="tab-manager" tabindex="0" hidden><span class="eyebrow">Jelajahi data</span><h3>UTM Manager</h3><p>Telusuri riwayat kunjungan dari ringkasan hingga ID browser dan sesi. Periksa URL perujuk bila browser menyediakannya.</p><ul class="check-list"><li>Top Source, Medium, Campaign, Content, dan Term berdasarkan sesi unik.</li><li>Tabel ID browser &amp; sesi: 5 baris awal, dapat diubah ke 1–500 baris.</li><li>Filter tanggal, source, ID browser; urutkan tabel dan ekspor CSV.</li></ul><span class="micro-note">UTM Match Type menerima utm_match_type maupun utm_matchtype.</span></section>
+        <section class="tab-panel card" id="panel-cta" role="tabpanel" aria-labelledby="tab-cta" tabindex="0" hidden><span class="eyebrow">Tampilan &amp; pesan</span><h3>CTA WA</h3><p>Kelola semua akun yang tampil dalam daftar chat dan atur format pesan untuk tombol plugin maupun tautan WhatsApp yang didukung.</p><ul class="check-list"><li>Nama, nomor, avatar, judul, pesan, hari aktif, dan ketersediaan halaman.</li><li>Prioritas dengan drag and drop; satu tombol floating di kiri atau kanan.</li><li>Warna dan ukuran floating; label, gaya huruf, pemisah, serta pilihan nilai sumber.</li></ul><span class="micro-note">Shortcode akun: [utr_whatsapp id="1"] — gunakan ID akun yang sebenarnya.</span></section>
+        <section class="tab-panel card" id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" tabindex="0" hidden><span class="eyebrow">Kontrol pelacakan</span><h3>Settings</h3><p>Tentukan data UTM mana yang masuk laporan, apakah tautan WhatsApp yang sudah ada dicatat, dan apakah UTM dibersihkan dari address bar.</p><ul class="check-list"><li>Pilih source, medium, campaign, content, term, dan match type untuk laporan baru.</li><li>Aktifkan atau matikan pencatatan klik tautan api.whatsapp.com dan wa.me yang sudah ada.</li><li>Aktifkan Clean URL; pilihan ini juga tersedia di UTM Manager.</li></ul><span class="micro-note">Pilihan UTM laporan berbeda dari pilihan nilai untuk teks pesan di CTA WA.</span></section>
+      </div>
+    </div></div></section>
+    <section class="section" id="setup" style="background:#fff"><div class="container"><div class="section-head"><span class="eyebrow">Mulai cepat</span><h2>Setup dalam lima langkah.</h2><p class="lead">Siapkan plugin, buat akun WhatsApp, dan uji dengan kunjungan sungguhan dari jendela privat.</p></div><div class="setup-grid"><div class="steps">
+      <article class="card setup-step"><span class="number">01</span><div><h3>Instal &amp; aktifkan</h3><p>Di WordPress, buka Plugins → Add New → Upload Plugin. Pilih paket plugin yang sudah Anda miliki, lalu aktifkan. <a class="inline-link" href="https://wordpress.org/documentation/article/manage-plugins/#upload-via-wordpress-admin" target="_blank" rel="noopener noreferrer">Panduan resmi WordPress ↗</a></p></div></article>
+      <article class="card setup-step"><span class="number">02</span><div><h3>Pilih UTM laporan</h3><p>Buka Traffic Recorder → Settings. Centang parameter yang ingin dicatat pada laporan baru. Simpan pengaturan.</p></div></article>
+      <article class="card setup-step"><span class="number">03</span><div><h3>Buat akun CTA WA</h3><p>Isi nama admin, nomor internasional tanpa tanda +, pesan, avatar, hari aktif, dan halaman. Simpan akun.</p></div></article>
+      <article class="card setup-step"><span class="number">04</span><div><h3>Uji sebagai pengunjung</h3><p>Buka URL contoh di jendela privat atau saat tidak login. Klik CTA WA, lalu periksa teks sumber sebelum mengirim pesan.</p></div></article>
+      <article class="card setup-step"><span class="number">05</span><div><h3>Periksa dashboard</h3><p>Lihat pageview dan sesi di Dashboard Trafik &amp; UTM, detail di UTM Manager, serta klik di Dashboard Chat WA.</p></div></article>
+    </div><aside class="code-card"><h3>Contoh untuk pengujian</h3><p>Ganti domain contoh dengan domain WordPress Anda. Contoh ini tidak mengirim data apa pun dari halaman dokumentasi.</p><div class="code-label"><span>URL dengan UTM</span><button class="copy-button" type="button" data-copy="contoh-utm" aria-label="Salin contoh URL UTM">Salin</button></div><pre id="contoh-utm">https://example.com/kelas/?utm_source=GADS&amp;utm_medium=CPC&amp;utm_campaign=PROMO_A&amp;utm_content=GRUP_A&amp;utm_term=KURSUS</pre><div class="code-label"><span>Shortcode akun WA</span><button class="copy-button" type="button" data-copy="contoh-shortcode" aria-label="Salin contoh shortcode">Salin</button></div><pre id="contoh-shortcode">[utr_whatsapp id="1"]</pre><p class="tip">Butuh WordPress 6.0+, PHP 7.4+, JavaScript, dan WordPress REST API pada halaman publik. Kunjungan pengguna yang login tidak masuk laporan.</p></aside></div></div></section>
+    <section class="section" id="cta-wa"><div class="container"><div class="split"><div><span class="eyebrow">Pesan WhatsApp</span><h2>Pesan rapi, sumber tetap terbaca.</h2><p class="lead">Tulis pesan akun dalam beberapa baris. Plugin menambah baris sumber setelah satu baris kosong saat tombol atau tautan WA yang didukung diklik.</p><div class="mini-grid"><div class="card mini-card"><b>Dengan UTM</b><p>Pilih source, medium, campaign, content, term, match type, ID sesi, atau ID browser. Atur label, huruf, dan pemisahnya.</p></div><div class="card mini-card"><b>Tanpa UTM</b><p>Aktifkan atau matikan fallback. Ubah label dan pilih URL halaman pengunjung atau link khusus.</p></div><div class="card mini-card"><b>Beberapa admin</b><p>Satu launcher membuka daftar akun. Prioritas, hari aktif, halaman, dan visibilitas daftar chat bisa diatur.</p></div><div class="card mini-card"><b>Tautan lama</b><p>api.whatsapp.com/send, wa.me/send, dan wa.me/nomor didukung. Penambahan sumber dan pencatatan klik punya toggle terpisah.</p></div></div></div><div class="card preview"><div class="preview-head"><strong>Contoh pesan yang dibuka</strong><div class="segmented" role="group" aria-label="Pilih contoh pesan"><button type="button" data-preview="utm" aria-pressed="true">Dengan UTM</button><button type="button" data-preview="url" aria-pressed="false">Tanpa UTM</button></div></div><div class="chat-stage"><div class="chat-bubble" id="chat-bubble" aria-live="polite">Halo Kak,<br>saya ingin bertanya tentang program ini.<br><br>Sumber: GADS+a1b2c3d4</div></div><p class="preview-foot">Ilustrasi format bawaan. Isi pesan, label, dan nilai sebenarnya mengikuti pengaturan situs Anda.</p></div></div><div class="mini-grid" style="margin-top:18px"><div class="card mini-card"><b>Pilihan sumber pesan</b><p>Mode localStorage memakai UTM aktif terbaru, termasuk kunjungan berikutnya pada browser yang sama. Mode sesi memakai UTM yang diterima tab saat itu; tab baru tanpa UTM dapat memakai fallback URL.</p></div><div class="card mini-card"><b>Enam parameter laporan</b><p>Settings mengatur UTM yang tercatat pada kolom laporan WordPress. Pilihan pada CTA WA hanya mengatur baris sumber pesan. Keduanya terpisah dan tidak mengubah data lama.</p></div></div><div class="plain-band" style="margin-top:18px"><div><h3>Beranda tidak menampilkan tombol?</h3><p>Jika akun diatur untuk “Hanya halaman yang dipilih”, centang juga “Beranda / homepage”. Periksa hari aktif, toggle floating, toggle daftar chat akun, serta cache halaman.</p></div><a class="button button-primary" href="#faq">Lihat pemecahan masalah <span aria-hidden="true">→</span></a></div></div></section>
+    <section class="section" id="transparansi" style="background:#fff"><div class="container"><div class="section-head"><span class="eyebrow">Transparansi data</span><h2>Data apa yang disimpan, di mana, dan berapa lama?</h2><p class="lead">Identitas di sini adalah pengenal browser dan tab untuk pelaporan, bukan identitas seseorang yang terverifikasi.</p></div><div class="data-table-wrap"><table><thead><tr><th scope="col">Lokasi</th><th scope="col">Isi utama</th><th scope="col">Masa &amp; perilaku</th></tr></thead><tbody>
+      <tr><td>localStorage<br><code>utr_visitor_v1</code></td><td>ID browser dan UTM aktif. Menjadi sumber bawaan untuk teks WA.</td><td>Berada pada browser dan domain itu sampai data situs dihapus. UTM baru mengganti seluruh set UTM aktif.</td></tr>
+      <tr><td>sessionStorage<br><code>utr_session_v2</code></td><td>ID sesi tab, halaman pertama, perujuk bila tersedia, dan UTM sesi.</td><td>Tab baru memperoleh ID sesi baru. UTM baru dalam tab memperbarui UTM sesi.</td></tr>
+      <tr><td>Cookie pihak pertama<br><code>utr_vid_v1</code></td><td>Hanya ID browser sebagai cadangan jika localStorage tidak tersedia; tidak berisi UTM.</td><td>Berlaku maksimal satu tahun dan disamakan dengan ID browser yang aktif.</td></tr>
+      <tr><td>Database WordPress</td><td>Riwayat kunjungan dan klik WA, ID browser, ID sesi, UTM laporan yang aktif, serta baris sumber pesan klik.</td><td>Catatan lebih dari 90 hari dibersihkan oleh WP-Cron saat WordPress menerima kunjungan.</td></tr>
+    </tbody></table></div><div class="truth-grid">
+      <div class="truth"><b>Klik ≠ pesan terkirim</b><p>Dashboard Chat WA mencatat klik yang berhasil diproses. Plugin tidak mengetahui apakah pesan WhatsApp kemudian dikirim, diterima, atau dibaca.</p></div>
+      <div class="truth"><b>Sesi unik ≠ orang unik</b><p>Satu browser dapat membuka beberapa tab atau sesi. Browser atau perangkat lain, mode privat, dan penghapusan data situs dapat menghasilkan ID baru.</p></div>
+      <div class="truth"><b>Perujuk bergantung pada browser</b><p>URL perujuk lengkap tampil hanya jika browser dan situs asal memberikannya. Nilainya bisa berupa domain saja atau kosong.</p></div>
+      <div class="truth"><b>Clean URL bekerja di browser</b><p>UTM dihapus dari address bar setelah skrip berjalan. URL awal tetap masuk pada permintaan halaman pertama dan bisa terlihat sebentar.</p></div>
+      <div class="truth"><b>Yang tidak disimpan</b><p>Plugin tidak menyimpan alamat IP, user agent, atau teks utama pesan WhatsApp dalam catatan klik. Baris sumber tambahan tetap tersimpan.</p></div>
+      <div class="truth"><b>Batas teknis pencatatan</b><p>JavaScript, REST API, serta penyimpanan browser perlu bekerja. Pemblokir privasi atau cache skrip lama dapat membuat pencatatan gagal atau ID berubah.</p></div>
+    </div><p class="small muted" style="margin-top:20px">Mengubah pilihan UTM hanya berlaku untuk data baru; riwayat lama tidak ditulis ulang. Ekspor CSV mengikuti filter dan memakai waktu UTC, sedangkan dashboard menampilkan zona waktu WordPress. Penghapusan plugin melalui WordPress menghapus tabel laporan dan opsi plugin.</p></div></section>
+    <section class="section" id="faq"><div class="container"><div class="section-head"><span class="eyebrow">Pertanyaan umum</span><h2>Jawaban untuk kasus yang paling sering muncul.</h2></div><div class="faq-list">
+      <details><summary>Mengapa tombol floating tidak muncul di homepage?</summary><p>Periksa apakah tombol mengambang aktif, ada akun yang aktif pada hari tersebut, dan toggle “Daftar chat” akun menyala. Jika ketersediaan memakai “Hanya halaman yang dipilih”, centang “Beranda / homepage”. Setelah menyimpan, bersihkan cache halaman atau CDN.</p></details>
+      <details><summary>Mengapa UTM masih terlihat di address bar?</summary><p>Pastikan Clean URL aktif di Settings atau UTM Manager. Hapus cache halaman/CDN agar skrip terbaru dimuat. Clean URL memerlukan JavaScript dan berjalan setelah halaman mulai dimuat; UTM awal tetap dapat terlihat singkat serta tetap terkirim pada permintaan pertama.</p></details>
+      <details><summary>Mengapa URL perujuk hanya menampilkan domain?</summary><p>Browser atau situs asal dapat membatasi informasi perujuk melalui kebijakan referrer. Plugin menampilkan URL lengkap hanya saat browser mengirimkannya. Data lama yang dahulu hanya menyimpan domain tidak dapat direkonstruksi menjadi URL lengkap.</p></details>
+      <details><summary>Mengapa ID browser atau ID sesi bisa kosong?</summary><p>Catatan lama dapat berasal dari versi sebelum kedua ID diwajibkan. Sejak versi 2.4.2, pencatatan baru hanya menerima ID browser dan ID sesi yang sama-sama berupa UUID valid. Jika data baru tidak muncul, periksa cache skrip, JavaScript, REST API, dan pemblokiran penyimpanan browser.</p></details>
+      <details><summary>Apakah pilihan UTM di Settings dan CTA WA saling membatasi?</summary><p>Tidak. Settings menentukan kolom UTM untuk laporan baru di WordPress. Pilihan dalam CTA WA menentukan nilai yang muncul pada baris sumber pesan. Nilai yang dipilih untuk pesan bisa ada walau kolom laporan terkait kosong.</p></details>
+      <details><summary>Apakah UTM lama tetap dipakai saat kampanye baru hanya mengirim source?</summary><p>Tidak. Tautan yang membawa UTM baru mengganti seluruh set UTM aktif. Jika hanya source yang ada, medium, campaign, content, term, dan match type sebelumnya menjadi kosong.</p></details>
+      <details><summary>Apakah klik WhatsApp dihitung sebagai chat yang berhasil?</summary><p>Tidak. Plugin mengetahui klik tautan yang diproses, bukan status pengiriman atau balasan di aplikasi WhatsApp.</p></details>
+      <details><summary>Bagaimana data dihapus?</summary><p>Riwayat lebih dari 90 hari dibersihkan otomatis melalui WP-Cron saat WordPress menerima kunjungan. Menghapus plugin dari WordPress menjalankan uninstall yang menghapus tabel laporan dan opsi plugin. Jika riwayat masih dibutuhkan, cadangkan database sebelum menghapus.</p></details>
+    </div></div></section>
+    <section class="cta-section"><div class="container cta-inner"><div><span class="eyebrow">Siap mencoba?</span><h2>Mulai dari pengaturan yang benar.</h2><p>Ikuti setup, uji satu URL ber-UTM, lalu cocokkan hasilnya dengan dashboard WordPress.</p></div><div class="cta-actions"><a class="button button-primary" href="#setup">Buka panduan setup <span aria-hidden="true">→</span></a><a class="button button-ghost" href="#transparansi">Tinjau data</a></div></div></section>
+  </main>
+  <footer><div class="container footer-inner"><div><a class="brand" href="https://www.mtalkblog.com" target="_blank" rel="noopener noreferrer"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M8 21.5c2.3 2.3 5.2 3.3 8.3 2.9 5-.7 8.4-4.4 8.4-9.1 0-4.8-3.2-8.4-8-8.4-4 0-6.5 2.1-6.5 5.2 0 2.9 2.3 4.2 6.5 4.5l3.1.2" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="m19 12 5.7-1.1L23.6 5" stroke="#B9F227" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>UTM <span>Traffic</span> Recorder</span></a><p>© <span id="year">2026</span> <a href="https://www.mtalkblog.com" target="_blank" rel="noopener noreferrer">UTM Trafik Manager</a> · Dibuat oleh Galih Enggarnanto · GPLv2 atau lebih baru.</p></div><div class="footer-links"><a href="#fitur">Fitur</a><a href="#setup">Setup</a><a href="#transparansi">Transparansi</a><a href="#faq">FAQ</a></div></div></footer>
+  <script>
+    (() => {
+      "use strict";
+      const menuButton = document.getElementById("menu-toggle");
+      const navigation = document.getElementById("main-nav");
+      const closeMenu = () => { menuButton.setAttribute("aria-expanded", "false"); menuButton.setAttribute("aria-label", "Buka menu"); navigation.classList.remove("is-open"); };
+      menuButton.addEventListener("click", () => { const open = menuButton.getAttribute("aria-expanded") !== "true"; menuButton.setAttribute("aria-expanded", String(open)); menuButton.setAttribute("aria-label", open ? "Tutup menu" : "Buka menu"); navigation.classList.toggle("is-open", open); });
+      navigation.querySelectorAll("a").forEach(link => link.addEventListener("click", closeMenu));
+      document.addEventListener("keydown", event => { if (event.key === "Escape") closeMenu(); });
+      const tabs = [...document.querySelectorAll('[role="tab"]')];
+      function selectTab(tab, focus = false) {
+        tabs.forEach(item => { const selected = item === tab; item.setAttribute("aria-selected", String(selected)); item.tabIndex = selected ? 0 : -1; document.getElementById(item.getAttribute("aria-controls")).hidden = !selected; });
+        if (focus) tab.focus();
+      }
+      tabs.forEach((tab, index) => {
+        tab.addEventListener("click", () => selectTab(tab));
+        tab.addEventListener("keydown", event => {
+          let next = index;
+          if (event.key === "ArrowRight" || event.key === "ArrowDown") next = (index + 1) % tabs.length;
+          else if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = (index - 1 + tabs.length) % tabs.length;
+          else if (event.key === "Home") next = 0;
+          else if (event.key === "End") next = tabs.length - 1;
+          else return;
+          event.preventDefault(); selectTab(tabs[next], true);
+        });
+      });
+      const examples = { utm: "Halo Kak,\nsaya ingin bertanya tentang program ini.\n\nSumber: GADS+a1b2c3d4", url: "Halo Kak,\nsaya ingin bertanya tentang program ini.\n\nSumber: https://example.com/kelas/" };
+      document.querySelectorAll("[data-preview]").forEach(button => button.addEventListener("click", () => { document.querySelectorAll("[data-preview]").forEach(item => item.setAttribute("aria-pressed", String(item === button))); document.getElementById("chat-bubble").textContent = examples[button.dataset.preview]; }));
+      document.querySelectorAll("[data-copy]").forEach(button => button.addEventListener("click", async () => {
+        const value = document.getElementById(button.dataset.copy).textContent.trim();
+        try {
+          if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(value);
+          else { const field = document.createElement("textarea"); field.value = value; field.style.position = "fixed"; field.style.opacity = "0"; document.body.appendChild(field); field.select(); if (!document.execCommand("copy")) throw new Error("copy failed"); field.remove(); }
+          const original = button.textContent; button.textContent = "Tersalin ✓"; window.setTimeout(() => { button.textContent = original; }, 2000);
+        } catch { button.textContent = "Gagal menyalin"; window.setTimeout(() => { button.textContent = "Salin"; }, 2000); }
+      }));
+      document.getElementById("year").textContent = new Date().getFullYear();
+      const progress = document.getElementById("progress");
+      let ticking = false;
+      const updateProgress = () => { const distance = document.documentElement.scrollHeight - window.innerHeight; progress.style.transform = "scaleX(" + (distance > 0 ? Math.min(1, window.scrollY / distance) : 0) + ")"; ticking = false; };
+      window.addEventListener("scroll", () => { if (!ticking) { window.requestAnimationFrame(updateProgress); ticking = true; } }, { passive: true });
+      updateProgress();
+      if ("IntersectionObserver" in window) {
+        const links = [...navigation.querySelectorAll('a[href^="#"]')];
+        const observer = new IntersectionObserver(entries => { entries.forEach(entry => { if (entry.isIntersecting) { links.forEach(link => { if (link.hash === "#" + entry.target.id) link.setAttribute("aria-current", "location"); else link.removeAttribute("aria-current"); }); } }); }, { rootMargin: "-25% 0px -65% 0px" });
+        links.forEach(link => { const section = document.querySelector(link.hash); if (section) observer.observe(section); });
+      }
+    })();
+  </script>
+</body>
+</html>

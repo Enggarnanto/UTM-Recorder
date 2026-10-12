@@ -1,0 +1,67 @@
+.utr-wa-account { display: inline-flex; align-items: center; gap: 10px; max-width: 100%; padding: 9px 14px 9px 9px; border-radius: 999px; background: var(--utr-wa-bg, #087f47); color: var(--utr-wa-text, #fff); box-shadow: 0 6px 20px rgba(0, 50, 25, .16); font: 600 13px/1.25 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; text-decoration: none; }
+.utr-wa-account:hover, .utr-wa-account:focus { color: var(--utr-wa-text, #fff); text-decoration: none; filter: brightness(.92); }
+.utr-wa-account:focus-visible, .utr-wa-launcher:focus-visible, .utr-wa-close:focus-visible { outline: 3px solid #152d20; outline-offset: 3px; }
+.utr-wa-avatar, .utr-wa-avatar-fallback { width: 42px; height: 42px; flex: none; border-radius: 50%; object-fit: cover; }
+.utr-wa-avatar-frame { position: relative; display: block; width: 42px; height: 42px; flex: none; }
+.utr-wa-avatar-frame .utr-wa-avatar { position: absolute; inset: 0; display: block; }
+.utr-wa-avatar-frame .utr-wa-avatar-fallback { position: absolute; inset: 0; }
+.utr-wa-avatar-fallback { display: grid; place-items: center; background: rgba(255, 255, 255, .22); color: inherit; font-weight: 800; }
+.utr-wa-copy { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
+.utr-wa-copy strong, .utr-wa-copy small { color: inherit; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.utr-wa-copy strong { font-size: 14px; }
+.utr-wa-copy small { font-size: 11px; opacity: .9; }
+.utr-wa-shortcode { margin: 4px 0; }
+.utr-wa-widget { position: fixed; bottom: max(18px, env(safe-area-inset-bottom)); z-index: 99999; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; width: min(360px, calc(100vw - 28px)); font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.utr-wa-widget-right { right: max(18px, env(safe-area-inset-right)); }
+.utr-wa-widget-left { left: max(18px, env(safe-area-inset-left)); align-items: flex-start; }
+.utr-wa-panel[hidden] { display: none !important; }
+.utr-wa-panel { display: flex; flex-direction: column; width: 100%; max-height: min(70vh, 560px); overflow: hidden; border-radius: 17px; background: #fff; color: #183026; box-shadow: 0 14px 42px rgba(0, 40, 23, .24); }
+.utr-wa-panel-header { display: flex; flex: none; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 19px 20px; background: #087f47; color: #fff; }
+.utr-wa-panel-header strong { color: inherit; font-size: 17px; }
+.utr-wa-panel-header p { margin: 7px 0 0; color: inherit; font-size: 13px; line-height: 1.5; }
+.utr-wa-close { border: 0; background: transparent; color: #fff; font-size: 28px; line-height: 1; cursor: pointer; }
+.utr-wa-panel-list { display: flex; flex: 1 1 auto; flex-direction: column; gap: 9px; min-height: 0; overflow-y: auto; padding: 15px; }
+.utr-wa-panel-list .utr-wa-account { width: 100%; border-radius: 12px; }
+.utr-wa-panel-footer { flex: none; padding: 9px 15px 13px; border-top: 1px solid #e5eee9; background: #fff; color: #68796f; font-size: 11px; text-align: center; }
+.utr-wa-panel-footer a { color: #087f47; font-weight: 700; text-decoration: none; }
+.utr-wa-panel-footer a:hover { text-decoration: underline; }
+.utr-wa-launcher { display: inline-flex; align-items: center; gap: 9px; border: 0; border-radius: 999px; padding: 13px 18px; background: #087f47; box-shadow: 0 7px 24px rgba(0, 70, 37, .3); color: #fff; font: 700 14px/1.2 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; cursor: pointer; }
+.utr-wa-launcher:hover { background: #06693b; }
+.utr-wa-launcher svg { display: block; flex: none; }
+@media (max-width: 600px) { .utr-wa-widget { width: min(340px, calc(100vw - 28px)); bottom: max(14px, env(safe-area-inset-bottom)); } .utr-wa-widget-right { right: max(14px, env(safe-area-inset-right)); } .utr-wa-widget-left { left: max(14px, env(safe-area-inset-left)); } }
+
+/* UTM Trafik Manager brand theme. Saved per-account colors remain customizable. */
+.utr-wa-account {
+  background: var(--utr-wa-bg, #2563eb);
+  box-shadow: 0 7px 20px rgba(20, 33, 61, .12);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.utr-wa-account:hover,
+.utr-wa-account:focus-visible { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(20, 33, 61, .18); filter: none; }
+.utr-wa-account:focus-visible,
+.utr-wa-launcher:focus-visible,
+.utr-wa-close:focus-visible { outline: 3px solid #b9f227; outline-offset: 3px; }
+.utr-wa-widget { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+.utr-wa-panel { border: 1px solid #dbe5f0; border-radius: 20px; color: #1e293b; box-shadow: 0 22px 55px rgba(20, 33, 61, .22); }
+.utr-wa-panel-header { position: relative; padding: 21px 22px; background: #14213d; color: #fff; border-top: 4px solid #b9f227; }
+.utr-wa-panel-header strong { font-family: Sora, 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 17px; letter-spacing: -.025em; }
+.utr-wa-panel-header p { color: #dbeafe; }
+.utr-wa-close { width: 32px; height: 32px; flex: none; border-radius: 50%; background: rgba(255, 255, 255, .12); font-family: system-ui, sans-serif; }
+.utr-wa-close:hover { background: rgba(255, 255, 255, .24); }
+.utr-wa-panel-list { gap: 10px; padding: 17px; background: #f8fafc; }
+.utr-wa-panel-list .utr-wa-account { border-radius: 14px; }
+.utr-wa-panel-footer { border-top-color: #dbe5f0; background: #fff; color: #64748b; }
+.utr-wa-panel-footer a { color: #2563eb; }
+.utr-wa-launcher { position: relative; max-width: 100%; min-height: 44px; gap: calc(9px * var(--utr-launcher-scale, 1)); padding: calc(14px * var(--utr-launcher-scale, 1)) calc(20px * var(--utr-launcher-scale, 1)); background: var(--utr-launcher-bg, #14213d); color: var(--utr-launcher-text, #fff); box-shadow: 0 9px 25px rgba(20, 33, 61, .25); font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: calc(14px * var(--utr-launcher-scale, 1)); transition: transform .18s ease, filter .18s ease; }
+.utr-wa-launcher svg { width: calc(27px * var(--utr-launcher-scale, 1)); height: calc(27px * var(--utr-launcher-scale, 1)); }
+.utr-wa-launcher span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.utr-wa-launcher::after { content: ''; width: calc(8px * var(--utr-launcher-scale, 1)); height: calc(8px * var(--utr-launcher-scale, 1)); flex: none; margin-left: 2px; border-radius: 50%; background: var(--utr-launcher-accent, #b9f227); box-shadow: 0 0 0 3px rgba(20, 33, 61, .1); }
+.utr-wa-launcher:hover { transform: translateY(-2px); background: var(--utr-launcher-bg, #14213d); color: var(--utr-launcher-text, #fff); filter: brightness(1.12); }
+@media (prefers-reduced-motion: reduce) {
+  .utr-wa-account,
+  .utr-wa-launcher { transition: none; }
+  .utr-wa-account:hover,
+  .utr-wa-account:focus-visible,
+  .utr-wa-launcher:hover { transform: none; }
+}
