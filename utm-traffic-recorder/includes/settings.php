@@ -75,7 +75,7 @@ function utr_render_feature_settings() {
 	$notice = isset( $_GET['utr_notice'] ) && is_string( $_GET['utr_notice'] ) ? sanitize_key( wp_unslash( $_GET['utr_notice'] ) ) : '';
 	?>
 	<div class="wrap utr-admin">
-		<header class="utr-header"><div><p class="utr-eyebrow">KONTROL FITUR</p><h1>Settings</h1><p class="utr-subtitle">Atur kolom UTM laporan, pelacakan tautan, dan tampilan URL.</p></div></header>
+		<header class="utr-header"><div><p class="utr-eyebrow">KONTROL FITUR</p><h1>Settings</h1><?php utr_render_header_version(); ?><p class="utr-subtitle">Atur kolom UTM laporan, pelacakan tautan, dan tampilan URL.</p></div></header><hr class="wp-header-end">
 		<?php if ( 'saved' === $notice ) : ?><div class="notice notice-success is-dismissible"><p>Pengaturan fitur berhasil disimpan.</p></div><?php endif; ?>
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<input type="hidden" name="action" value="utr_save_feature_settings">

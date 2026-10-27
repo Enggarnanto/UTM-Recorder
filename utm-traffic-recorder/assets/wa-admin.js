@@ -33,8 +33,9 @@
     });
 
     function updatePreview() {
-      var message = $('#utr-account-message').val().trim();
+      var message = ($('#utr-account-message').val() || '').trim() || ($('#utr-global-message').val() || '').trim();
       var sample = {utm_source: 'GADS', utm_medium: 'CPC', utm_campaign: 'PROMO_A', utm_content: 'GRUP_A', utm_term: 'KURSUS', utm_match_type: 'EXACT', session_id: 'a1b2c3d4', visitor_id: 'e5f6a7b8'};
+      sample.custom = $('#utr-message-custom').val() || '';
       var mode = $('#utr-source-case').val();
       function format(value) {
         if (mode === 'upper') return value.toLocaleUpperCase();
@@ -42,10 +43,23 @@
         if (mode === 'title') return value.toLocaleLowerCase().replace(/(^|[\s_-])([a-z])/g, function (match, prefix, letter) { return prefix + letter.toLocaleUpperCase(); });
         return value;
       }
+      function resolve(value, custom) {
+        return value.replace(/\{\{\s*(utm_source|utm_medium|utm_campaign|utm_term|utm_content|utm_match_type|utm_matchtype|session_id|visitor_id|browser_id|custom)\s*\}\}|\{\s*(utm_source|utm_medium|utm_campaign|utm_term|utm_content|utm_match_type|utm_matchtype|session_id|visitor_id|browser_id|custom)\s*\}/gi, function (token, doubleKey, singleKey) {
+          var key = (doubleKey || singleKey).toLowerCase();
+          if (key === 'browser_id') key = 'visitor_id';
+          if (key === 'utm_matchtype') key = 'utm_match_type';
+          return key === 'custom' ? custom : format(sample[key] || '');
+        });
+      }
+      message = resolve(message, sample.custom).trim();
       var parts = $('input[name="source_fields[]"]:checked').map(function () { return format(sample[this.value] || ''); }).get();
       var label = ($('#utr-source-label').val() || 'Sumber').trim().replace(/[\s:]+$/, '') || 'Sumber';
       var line = parts.length ? label + ': ' + parts.join($('#utr-source-separator').val()) : '';
       $('#utr-account-message-preview').text(message + (message && line ? '\n\n' : '') + line);
+      var defaultMessage = resolve(($('#utr-global-message').val() || '').trim(), '').trim();
+      $('#utr-global-message-preview').text(defaultMessage + (defaultMessage && line ? '\n\n' : '') + line);
+      $('#utr-panel-title-preview').text($('#utr-panel-title').val() || '');
+      $('#utr-greeting-preview').text($('#utr-greeting').val() || '');
       var fallbackEnabled = $('#utr-fallback-enabled').is(':checked');
       var fallbackMode = $('input[name="fallback_url_mode"]:checked').val();
       $('#utr-fallback-options').toggle(fallbackEnabled);
@@ -53,11 +67,25 @@
       $('#utr-fallback-custom-url').prop('disabled', !(fallbackEnabled && fallbackMode === 'custom'));
       var fallbackUrl = fallbackMode === 'custom' ? ($('#utr-fallback-custom-url').val().trim() || 'https://example.com/halaman/') : 'https://example.com/halaman/';
       var fallbackLabel = ($('#utr-fallback-label').val() || 'Sumber').trim().replace(/[\s:]+$/, '') || 'Sumber';
-      var fallbackLine = fallbackEnabled ? fallbackLabel + ': ' + fallbackUrl : '';
+      var fallbackIds = $('input[name="fallback_id_fields[]"]:checked').map(function () { return format(sample[this.value] || ''); }).get();
+      var fallbackLine = fallbackEnabled ? fallbackLabel + ': ' + [fallbackUrl].concat(fallbackIds).join($('#utr-source-separator').val()) : '';
       $('#utr-fallback-message-preview').text(fallbackEnabled ? message + (message ? '\n\n' : '') + fallbackLine : 'Baris sumber tidak ditambahkan.');
     }
-    $('#utr-account-message, #utr-source-label, #utr-source-separator, #utr-fallback-label, #utr-fallback-custom-url').on('input', updatePreview);
-    $('#utr-source-case, input[name="source_fields[]"], #utr-fallback-enabled, input[name="fallback_url_mode"]').on('change', updatePreview);
+    $('#utr-account-message, #utr-global-message, #utr-panel-title, #utr-greeting, #utr-message-custom, #utr-source-label, #utr-source-separator, #utr-fallback-label, #utr-fallback-custom-url').on('input', updatePreview);
+    $('#utr-message-variable-insert').on('click', function () {
+      var key = $('#utr-message-variable').val();
+      var field = document.getElementById('utr-account-message');
+      if (!key || !field) return;
+      var token = '{' + key + '}';
+      var start = field.selectionStart;
+      var end = field.selectionEnd;
+      if (field.value.length - (end - start) + token.length > field.maxLength) return;
+      field.focus();
+      if (typeof field.setRangeText === 'function') field.setRangeText(token, start, end, 'end');
+      else field.value = field.value.slice(0, start) + token + field.value.slice(end);
+      $(field).trigger('input');
+    });
+    $('#utr-source-case, input[name="source_fields[]"], input[name="fallback_id_fields[]"], #utr-fallback-enabled, input[name="fallback_url_mode"]').on('change', updatePreview);
     updatePreview();
 
     function updateFloatingPreview() {

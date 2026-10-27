@@ -11,6 +11,7 @@ function utr_wa_account_defaults() {
 		'phone'         => '',
 		'title'         => '',
 		'message'       => '',
+		'message_custom' => '',
 		'avatar_id'     => 0,
 		'days'          => range( 0, 6 ),
 		'page_mode'     => 'all',
@@ -82,6 +83,7 @@ function utr_wa_save_account() {
 		'phone'         => $phone,
 		'title'         => $title,
 		'message'       => $message,
+		'message_custom' => isset( $_POST['message_custom'] ) && is_string( $_POST['message_custom'] ) ? utr_clean_value( wp_unslash( $_POST['message_custom'] ), 191 ) : '',
 		'avatar_id'     => $avatar_id,
 		'days'          => $days,
 		'page_mode'     => $page_mode,
@@ -150,14 +152,8 @@ function utr_wa_toggle_floating_account() {
 }
 add_action( 'wp_ajax_utr_wa_toggle_floating_account', 'utr_wa_toggle_floating_account' );
 
-function utr_wa_save_global() {
-	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_die( 'Tidak diizinkan.', '', array( 'response' => 403 ) );
-	}
-	check_admin_referer( 'utr_wa_save_global' );
-	$settings = utr_whatsapp_settings();
+function utr_wa_appearance_settings( $settings ) {
 	$settings['floating_enabled'] = ! empty( $_POST['floating_enabled'] ) ? 1 : 0;
-	$settings['enhance_links'] = ! empty( $_POST['enhance_links'] ) ? 1 : 0;
 	$settings['floating_position'] = isset( $_POST['floating_position'] ) && 'left' === $_POST['floating_position'] ? 'left' : 'right';
 	foreach ( array( 'floating_bg_color' => '#14213d', 'floating_text_color' => '#ffffff', 'floating_accent_color' => '#b9f227' ) as $key => $default ) {
 		$color = isset( $_POST[ $key ] ) && is_string( $_POST[ $key ] ) ? sanitize_hex_color( wp_unslash( $_POST[ $key ] ) ) : '';
@@ -165,7 +161,37 @@ function utr_wa_save_global() {
 	}
 	$settings['floating_size'] = isset( $_POST['floating_size'] ) ? min( 140, max( 80, absint( $_POST['floating_size'] ) ) ) : 100;
 	$greeting = isset( $_POST['greeting'] ) && is_string( $_POST['greeting'] ) ? sanitize_textarea_field( wp_unslash( $_POST['greeting'] ) ) : '';
-	$settings['greeting'] = function_exists( 'mb_substr' ) ? mb_substr( $greeting, 0, 300 ) : substr( $greeting, 0, 300 );
+	$settings['greeting'] = function_exists( 'mb_substr' ) ? mb_substr( $greeting, 0, 300 ) : wp_check_invalid_utf8( substr( $greeting, 0, 300 ), true );
+	if ( isset( $_POST['panel_title'] ) && is_string( $_POST['panel_title'] ) ) {
+		$settings['panel_title'] = utr_clean_value( wp_unslash( $_POST['panel_title'] ), 80 );
+	}
+	return $settings;
+}
+
+function utr_wa_save_appearance() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'Tidak diizinkan.', '', array( 'response' => 403 ) );
+	}
+	check_admin_referer( 'utr_wa_save_appearance' );
+	update_option( 'utr_whatsapp_settings', utr_wa_appearance_settings( utr_whatsapp_settings() ), false );
+	utr_wa_admin_redirect( 'appearance_saved' );
+}
+add_action( 'admin_post_utr_wa_save_appearance', 'utr_wa_save_appearance' );
+
+function utr_wa_save_global() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'Tidak diizinkan.', '', array( 'response' => 403 ) );
+	}
+	check_admin_referer( 'utr_wa_save_global' );
+	$settings = utr_whatsapp_settings();
+	if ( isset( $_POST['save_section'] ) && 'appearance' === $_POST['save_section'] ) {
+		update_option( 'utr_whatsapp_settings', utr_wa_appearance_settings( $settings ), false );
+		utr_wa_admin_redirect( 'appearance_saved' );
+	}
+	if ( array_key_exists( 'greeting', $_POST ) ) {
+		$settings = utr_wa_appearance_settings( $settings );
+	}
+	$settings['enhance_links'] = ! empty( $_POST['enhance_links'] ) ? 1 : 0;
 	$message = isset( $_POST['message'] ) && is_string( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
 	$settings['message'] = function_exists( 'mb_substr' ) ? mb_substr( $message, 0, 1000 ) : wp_check_invalid_utf8( substr( $message, 0, 1000 ), true );
 	$label = isset( $_POST['source_label'] ) && is_string( $_POST['source_label'] ) ? utr_clean_value( wp_unslash( $_POST['source_label'] ), 50 ) : '';
@@ -181,6 +207,8 @@ function utr_wa_save_global() {
 	$fallback_label = isset( $_POST['fallback_label'] ) && is_string( $_POST['fallback_label'] ) ? utr_clean_value( wp_unslash( $_POST['fallback_label'] ), 50 ) : '';
 	$settings['fallback_label'] = rtrim( $fallback_label, " \t:" ) ?: 'Sumber';
 	$settings['fallback_url_mode'] = isset( $_POST['fallback_url_mode'] ) && 'custom' === $_POST['fallback_url_mode'] ? 'custom' : 'page';
+	$raw_fallback_ids = isset( $_POST['fallback_id_fields'] ) && is_array( $_POST['fallback_id_fields'] ) ? array_map( 'sanitize_key', array_filter( wp_unslash( $_POST['fallback_id_fields'] ), 'is_string' ) ) : array();
+	$settings['fallback_id_fields'] = array_values( array_intersect( array( 'session_id', 'visitor_id' ), $raw_fallback_ids ) );
 	$custom_url = isset( $_POST['fallback_custom_url'] ) && is_string( $_POST['fallback_custom_url'] ) ? esc_url_raw( wp_unslash( $_POST['fallback_custom_url'] ), array( 'http', 'https' ) ) : $settings['fallback_custom_url'];
 	$parts = $custom_url ? wp_parse_url( $custom_url ) : false;
 	if ( 'custom' === $settings['fallback_url_mode'] && $settings['fallback_enabled'] && ( ! $parts || empty( $parts['host'] ) || empty( $parts['scheme'] ) || ! in_array( $parts['scheme'], array( 'http', 'https' ), true ) ) ) {
@@ -215,6 +243,7 @@ function utr_render_cta_manager() {
 		'saved'           => 'Akun CTA berhasil disimpan.',
 		'deleted'         => 'Akun CTA berhasil dihapus.',
 		'global_saved'    => 'Pengaturan CTA WhatsApp berhasil disimpan.',
+		'appearance_saved' => 'Salam pembuka dan tampilan tombol berhasil disimpan.',
 		'invalid_account' => 'Nama akun dan nomor WhatsApp internasional yang valid wajib diisi.',
 		'invalid_days'    => 'Pilih setidaknya satu hari aktif.',
 		'invalid_pages'   => 'Pilih setidaknya satu halaman untuk mode halaman tertentu.',
@@ -223,8 +252,8 @@ function utr_render_cta_manager() {
 	);
 	?>
 	<div class="wrap utr-admin">
-		<header class="utr-header"><div><p class="utr-eyebrow">PENGELOLAAN WHATSAPP</p><h1>CTA WA</h1><p class="utr-subtitle">Kelola akun, tampilan tombol, jadwal, dan halaman tempat CTA muncul.</p></div></header>
-		<?php if ( isset( $messages[ $notice ] ) ) : ?><div class="notice <?php echo in_array( $notice, array( 'saved', 'deleted', 'global_saved' ), true ) ? 'notice-success' : 'notice-error'; ?> is-dismissible"><p><?php echo esc_html( $messages[ $notice ] ); ?></p></div><?php endif; ?>
+		<header class="utr-header"><div><p class="utr-eyebrow">PENGELOLAAN WHATSAPP</p><h1>CTA WA</h1><?php utr_render_header_version(); ?><p class="utr-subtitle">Kelola akun, tampilan tombol, jadwal, dan halaman tempat CTA muncul.</p></div></header><hr class="wp-header-end">
+		<?php if ( isset( $messages[ $notice ] ) ) : ?><div class="notice <?php echo in_array( $notice, array( 'saved', 'deleted', 'global_saved', 'appearance_saved' ), true ) ? 'notice-success' : 'notice-error'; ?> is-dismissible"><p><?php echo esc_html( $messages[ $notice ] ); ?></p></div><?php endif; ?>
 		<div class="utr-cta-layout">
 			<div>
 				<section class="utr-panel utr-table-panel" aria-labelledby="utr-account-heading">
@@ -244,7 +273,9 @@ function utr_render_cta_manager() {
 				<section class="utr-panel utr-settings-panel" aria-labelledby="utr-link-settings-heading"><h2 id="utr-link-settings-heading">Tombol mengambang &amp; tautan WhatsApp</h2><p>Satu tombol mengambang membuka daftar admin sesuai urutan tabel. Tautan yang sudah ada tetap memakai nomor dan pesannya sendiri.</p>
 					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"><input type="hidden" name="action" value="utr_wa_save_global"><?php wp_nonce_field( 'utr_wa_save_global' ); ?>
 						<label class="utr-switch-row"><input type="checkbox" name="floating_enabled" value="1" <?php checked( ! empty( $settings['floating_enabled'] ) ); ?>><span><strong>Tampilkan tombol WA mengambang</strong><small>Jika mati, daftar admin mengambang disembunyikan. Shortcode tetap aktif.</small></span></label>
-						<label class="utr-field" for="utr-greeting">Salam pembuka daftar admin<textarea id="utr-greeting" name="greeting" rows="3" maxlength="300"><?php echo esc_textarea( $settings['greeting'] ); ?></textarea><small>Baris baru akan tampil di panel chat.</small></label>
+						<label class="utr-field" for="utr-panel-title">Judul daftar admin<input id="utr-panel-title" name="panel_title" type="text" maxlength="80" value="<?php echo esc_attr( $settings['panel_title'] ); ?>"><small>Judul yang tampil di atas salam pembuka.</small></label>
+						<label class="utr-field" for="utr-greeting">Salam pembuka daftar admin<textarea id="utr-greeting" name="greeting" rows="3" maxlength="300"><?php echo esc_textarea( $settings['greeting'] ); ?></textarea><small>Baris baru akan tampil di panel chat setelah pengaturan disimpan.</small></label>
+						<div class="utr-message-preview"><strong id="utr-panel-title-preview"><?php echo esc_html( $settings['panel_title'] ); ?></strong><pre id="utr-greeting-preview" aria-live="polite"><?php echo esc_html( $settings['greeting'] ); ?></pre></div>
 						<label class="utr-field" for="utr-floating-position">Posisi tombol mengambang<select id="utr-floating-position" name="floating_position"><option value="right" <?php selected( 'right' === $settings['floating_position'] ); ?>>Kanan</option><option value="left" <?php selected( 'left' === $settings['floating_position'] ); ?>>Kiri</option></select></label>
 						<fieldset class="utr-fieldset utr-floating-style"><legend>Tampilan tombol floating</legend>
 							<p class="utr-setting-intro">Atur tombol pembuka chat yang tampil di sudut halaman.</p>
@@ -255,10 +286,11 @@ function utr_render_cta_manager() {
 							</div>
 							<label class="utr-floating-size-control" for="utr-floating-size"><span>Ukuran tombol <output id="utr-floating-size-value" for="utr-floating-size"><?php echo esc_html( $floating_size ); ?>%</output></span><input id="utr-floating-size" type="range" name="floating_size" min="80" max="140" step="5" value="<?php echo esc_attr( $floating_size ); ?>"><small>80% lebih ringkas, 140% lebih besar. Ukuran panel daftar admin tetap nyaman dibaca.</small></label>
 							<div class="utr-floating-preview"><span>Pratinjau tombol</span><div id="utr-floating-preview-launcher" class="utr-floating-preview-launcher" style="--utr-launcher-bg:<?php echo esc_attr( $floating_bg ); ?>;--utr-launcher-text:<?php echo esc_attr( $floating_text ); ?>;--utr-launcher-accent:<?php echo esc_attr( $floating_accent ); ?>;--utr-launcher-scale:<?php echo esc_attr( $floating_size / 100 ); ?>"><span class="utr-floating-preview-icon" aria-hidden="true"></span><strong>Chat WhatsApp</strong><i aria-hidden="true"></i></div></div>
-							<button class="button button-primary" type="submit">Simpan tampilan tombol</button>
+							<button class="button button-primary" type="submit" name="save_section" value="appearance" formnovalidate>Simpan posisi, salam &amp; tampilan tombol</button>
 						</fieldset>
 						<label class="utr-switch-row utr-switch-spaced"><input type="checkbox" name="enhance_links" value="1" <?php checked( ! empty( $settings['enhance_links'] ) ); ?>><span><strong>Tambahkan sumber ke tautan WA yang sudah ada</strong><small>Berlaku untuk api.whatsapp.com/send dan wa.me. Pelacakan klik diatur terpisah pada menu Settings.</small></span></label>
-						<label class="utr-field" for="utr-global-message">Pesan default jika tautan belum punya pesan<textarea id="utr-global-message" name="message" rows="5" maxlength="1000"><?php echo esc_textarea( $settings['message'] ); ?></textarea><small>Tekan Enter untuk membuat paragraf. Baris sumber ditambahkan terpisah setelah pesan.</small></label><button class="button utr-insert-newline" type="button" data-target="utr-global-message">Tambah baris baru</button>
+						<label class="utr-field" for="utr-global-message">Pesan default jika tautan belum punya pesan<textarea id="utr-global-message" name="message" rows="5" maxlength="1000"><?php echo esc_textarea( $settings['message'] ); ?></textarea><small>Dipakai jika pesan akun kosong. Untuk tautan WA yang sudah ada, aktifkan opsi Tambahkan sumber di atas: pesan pada tautan diprioritaskan, lalu pesan akun sesuai nomor, lalu pesan default. Mendukung variabel UTM dan ID seperti {utm_source} dan {session_id}.</small></label><button class="button utr-insert-newline" type="button" data-target="utr-global-message">Tambah baris baru</button>
+						<div class="utr-message-preview"><strong>Pratinjau pesan default dengan contoh UTM dan ID</strong><pre id="utr-global-message-preview" aria-live="polite"></pre></div>
 						<fieldset class="utr-fieldset utr-source-format"><legend>Format sumber dalam pesan WA</legend>
 							<p>Atur baris yang ditambahkan setelah pesan akun, pesan default, atau pesan pada tautan WA yang didukung.</p>
 							<div class="utr-source-choice-heading">UTM untuk pesan diambil dari</div>
@@ -282,6 +314,9 @@ function utr_render_cta_manager() {
 								<div class="utr-source-choice-heading">Link yang ditampilkan</div>
 								<div class="utr-fallback-choices"><label class="utr-switch-row"><input type="radio" name="fallback_url_mode" value="page" <?php checked( 'page' === $settings['fallback_url_mode'] ); ?>><span><strong>URL halaman pengunjung</strong><small>Otomatis mengikuti halaman tempat tombol WA diklik.</small></span></label><label class="utr-switch-row"><input type="radio" name="fallback_url_mode" value="custom" <?php checked( 'custom' === $settings['fallback_url_mode'] ); ?>><span><strong>Link khusus</strong><small>Gunakan satu link tetap untuk semua halaman.</small></span></label></div>
 								<label class="utr-field" for="utr-fallback-custom-url">Link khusus<input id="utr-fallback-custom-url" name="fallback_custom_url" type="url" maxlength="2048" value="<?php echo esc_attr( $settings['fallback_custom_url'] ); ?>" placeholder="https://example.com/halaman/"><small>Diisi hanya jika memilih Link khusus.</small></label>
+								<div class="utr-source-choice-heading">Tambahkan ID setelah URL (opsional)</div>
+								<div class="utr-fallback-choices"><label class="utr-switch-row"><input type="checkbox" name="fallback_id_fields[]" value="session_id" <?php checked( in_array( 'session_id', (array) $settings['fallback_id_fields'], true ) ); ?>><span><strong>ID sesi</strong><small>8 karakter awal sesi aktif.</small></span></label><label class="utr-switch-row"><input type="checkbox" name="fallback_id_fields[]" value="visitor_id" <?php checked( in_array( 'visitor_id', (array) $settings['fallback_id_fields'], true ) ); ?>><span><strong>ID browser</strong><small>8 karakter awal browser pengunjung.</small></span></label></div>
+								<p class="utr-setting-note">Pemisah dan gaya huruf ID mengikuti pilihan Format sumber dalam pesan WA di atas. Kosongkan kedua kotak untuk menampilkan URL saja.</p>
 								<div class="utr-message-preview"><strong>Pratinjau tanpa UTM</strong><pre id="utr-fallback-message-preview" aria-live="polite"></pre></div>
 							</div>
 						</fieldset>
@@ -296,6 +331,8 @@ function utr_render_cta_manager() {
 					<label class="utr-field" for="utr-account-phone">Nomor WhatsApp<input id="utr-account-phone" name="phone" type="tel" inputmode="numeric" maxlength="20" required value="<?php echo esc_attr( $form['phone'] ); ?>" placeholder="62XXXXXXXXXX"><small>Gunakan format internasional, tanpa + atau 0 di depan.</small></label>
 					<label class="utr-field" for="utr-account-title">Judul / keterangan<input id="utr-account-title" name="title" type="text" maxlength="100" value="<?php echo esc_attr( $form['title'] ); ?>" placeholder="Konsultan Program"></label>
 					<label class="utr-field" for="utr-account-message">Pesan akun<textarea id="utr-account-message" name="message" rows="6" maxlength="1000" placeholder="Halo kak, saya ingin bertanya...&#10;&#10;Apakah program ini masih tersedia?"><?php echo esc_textarea( $form['message'] ); ?></textarea><small>Tekan Enter untuk membuat paragraf. UTM atau URL halaman ditambahkan pada baris terpisah. Tautan lama yang sudah punya parameter text tetap memakai teks dari tautan tersebut.</small></label><button class="button utr-insert-newline" type="button" data-target="utr-account-message">Tambah baris baru</button>
+					<div class="utr-field"><label for="utr-message-variable">Tambahkan variabel ke pesan</label><select id="utr-message-variable"><option value="">Pilih variabel</option><?php foreach ( utr_wa_message_source_choices() as $key => $label ) : ?><option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></option><?php endforeach; ?><option value="custom">Custom</option></select><button type="button" class="button" id="utr-message-variable-insert">Sisipkan variabel</button><small>Variabel diisi saat pengunjung mengeklik WhatsApp. UTM yang tidak tersedia menjadi kosong; ID menggunakan 8 karakter pertama.</small></div>
+					<label class="utr-field" for="utr-message-custom">Nilai custom<input type="text" id="utr-message-custom" name="message_custom" maxlength="191" value="<?php echo esc_attr( $form['message_custom'] ); ?>" placeholder="Contoh: Promo Oktober"><small>Nilai ini menggantikan <code>{custom}</code> dalam pesan akun.</small></label>
 					<div class="utr-message-preview"><strong>Pratinjau pesan dengan contoh UTM dan ID</strong><pre id="utr-account-message-preview" aria-live="polite"></pre></div>
 					<div class="utr-field"><strong>Avatar</strong><input id="utr-avatar-id" type="hidden" name="avatar_id" value="<?php echo esc_attr( $form['avatar_id'] ); ?>"><div class="utr-avatar-picker"><div id="utr-avatar-preview"><?php echo $form['avatar_id'] ? wp_kses_post( wp_get_attachment_image( absint( $form['avatar_id'] ), array( 72, 72 ), false, array( 'sizes' => '72px', 'loading' => 'eager' ) ) ) : '<span class="utr-admin-avatar-fallback">WA</span>'; ?></div><button id="utr-avatar-select" class="button" type="button">Pilih avatar</button><button id="utr-avatar-remove" class="button" type="button">Hapus</button></div></div>
 					<fieldset class="utr-fieldset"><legend>Hari aktif</legend><div class="utr-day-grid"><?php foreach ( utr_wa_day_labels() as $number => $day ) : ?><label><input type="checkbox" name="days[]" value="<?php echo esc_attr( $number ); ?>" <?php checked( in_array( $number, array_map( 'intval', $form['days'] ), true ) ); ?>><?php echo esc_html( $day ); ?></label><?php endforeach; ?></div></fieldset>
@@ -346,8 +383,8 @@ function utr_render_wa_dashboard() {
 	$base = admin_url( 'admin.php?page=utr-wa-dashboard' );
 	$args = array( 'from' => $filters[0], 'to' => $filters[1], 'source' => $filters[2], 'account_id' => $account_id );
 	?>
-	<div class="wrap utr-admin"><header class="utr-header"><div><p class="utr-eyebrow">ANALITIK WHATSAPP</p><h1>Dashboard Chat WA</h1><p class="utr-subtitle">Lihat siapa yang diklik, halaman asal, dan parameter UTM lengkapnya.</p></div></header>
-		<section class="utr-panel utr-filter-panel"><div class="utr-panel-heading"><h2>Filter klik</h2><span>Zona waktu: <?php echo esc_html( wp_timezone_string() ); ?></span></div><form class="utr-filters utr-manager-filters" method="get"><input type="hidden" name="page" value="utr-wa-dashboard"><label>Dari tanggal<input type="date" name="from" value="<?php echo esc_attr( $filters[0] ); ?>" required></label><label>Sampai tanggal<input type="date" name="to" value="<?php echo esc_attr( $filters[1] ); ?>" required></label><label>UTM source<input type="text" name="source" value="<?php echo esc_attr( $filters[2] ); ?>" placeholder="Semua sumber"></label><label>Akun<select name="account_id"><option value="0">Semua akun</option><?php foreach ( $accounts as $account ) : ?><option value="<?php echo esc_attr( $account['id'] ); ?>" <?php selected( $account_id === (int) $account['id'] ); ?>><?php echo esc_html( $account['name'] ); ?></option><?php endforeach; ?></select></label><button class="button button-secondary" type="submit">Terapkan filter</button><a class="utr-clear" href="<?php echo esc_url( $base ); ?>">Reset</a></form></section>
+	<div class="wrap utr-admin"><header class="utr-header"><div><p class="utr-eyebrow">ANALITIK WHATSAPP</p><h1>Dashboard Chat WA</h1><?php utr_render_header_version(); ?><p class="utr-subtitle">Lihat siapa yang diklik, halaman asal, dan parameter UTM lengkapnya.</p></div></header><hr class="wp-header-end">
+		<section class="utr-panel utr-filter-panel"><div class="utr-panel-heading"><h2>Filter klik</h2><span>Zona waktu: <?php echo esc_html( wp_timezone_string() ); ?></span></div><?php utr_render_quick_ranges( $base, $filters, array( 'source' => $filters[2], 'account_id' => $account_id ) ); ?><form class="utr-filters utr-manager-filters" method="get"><input type="hidden" name="page" value="utr-wa-dashboard"><label>Dari tanggal<input type="date" name="from" value="<?php echo esc_attr( $filters[0] ); ?>" required></label><label>Sampai tanggal<input type="date" name="to" value="<?php echo esc_attr( $filters[1] ); ?>" required></label><label>UTM source<input type="text" name="source" value="<?php echo esc_attr( $filters[2] ); ?>" placeholder="Semua sumber"></label><label>Akun<select name="account_id"><option value="0">Semua akun</option><?php foreach ( $accounts as $account ) : ?><option value="<?php echo esc_attr( $account['id'] ); ?>" <?php selected( $account_id === (int) $account['id'] ); ?>><?php echo esc_html( $account['name'] ); ?></option><?php endforeach; ?></select></label><button class="button button-secondary" type="submit">Terapkan filter</button><a class="utr-clear" href="<?php echo esc_url( $base ); ?>">Reset</a></form></section>
 		<section class="utr-stats" aria-label="Ringkasan klik WhatsApp"><div class="utr-stat"><span class="utr-stat-icon dashicons dashicons-format-chat" aria-hidden="true"></span><span class="utr-stat-label">Total klik WA</span><strong><?php echo esc_html( number_format_i18n( $total ) ); ?></strong><small>Termasuk tautan WhatsApp yang sudah ada</small></div><div class="utr-stat"><span class="utr-stat-icon dashicons dashicons-groups" aria-hidden="true"></span><span class="utr-stat-label">Sesi pengunjung yang klik</span><strong><?php echo esc_html( number_format_i18n( $visitors ) ); ?></strong><small>Satu tab browser dihitung satu sesi</small></div><div class="utr-stat"><span class="utr-stat-icon dashicons dashicons-tag" aria-hidden="true"></span><span class="utr-stat-label">Klik dengan UTM tercatat</span><strong><?php echo esc_html( number_format_i18n( $tagged ) ); ?></strong><small>Berdasarkan kolom UTM yang aktif di Settings</small></div></section>
 		<section class="utr-wa-ranking" aria-labelledby="utr-wa-ranking-heading">
 			<div class="utr-panel-heading"><div><h2 id="utr-wa-ranking-heading">Top Akun/Nomor</h2><p>Urutan berdasarkan sesi unik yang mengklik, sesuai filter di atas.</p></div></div>

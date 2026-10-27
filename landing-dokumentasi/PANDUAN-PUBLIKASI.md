@@ -10,7 +10,7 @@ Gunakan **blogger-page.html** untuk halaman Blogger. File ini merupakan potongan
 
 Jangan beralih kembali ke mode Compose setelah menempelkan kode, karena editor visual dapat mengubah struktur HTML, CSS, atau JavaScript. Jika editor Blogger atau tema yang dipakai menghapus tag style/script, masukkan CSS melalui **Theme → Customize → Advanced → Add CSS** dan JavaScript melalui **Theme → Edit HTML** atau gadget HTML/JavaScript; elemen HTML tetap di halaman. Periksa perubahan pada tema di pratinjau sebelum dipublikasikan.
 
-Font Sora dan Plus Jakarta Sans dimuat dari Google Fonts; bila tidak tersedia, font sistem dipakai. Ilustrasi dashboard dan contoh pesan bukan data nyata. Halaman ini menjelaskan plugin versi **2.6.4**.
+Font Sora dan Plus Jakarta Sans dimuat dari Google Fonts; bila tidak tersedia, font sistem dipakai. Ilustrasi dashboard dan contoh pesan bukan data nyata. Halaman ini menjelaskan plugin versi **2.6.5**.
 
 Versi Blogger memakai logo dari URL Blogger yang diberikan, serta baris fitur berbasis elemen div agar editor tidak mengubah daftar dan menampilkan kode entitas seperti &amp;#10;.
 

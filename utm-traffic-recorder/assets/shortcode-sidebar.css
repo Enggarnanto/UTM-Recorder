@@ -1,0 +1,24 @@
+.utr-shortcode-sidebar > p:first-child {
+  margin-top: 0;
+}
+
+.utr-shortcode-item {
+  border-top: 1px solid #dcdcde;
+  padding: 10px 0;
+}
+
+.utr-shortcode-item strong,
+.utr-shortcode-item code {
+  display: block;
+  margin-bottom: 7px;
+  overflow-wrap: anywhere;
+}
+
+.utr-shortcode-item code {
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.utr-shortcode-block-panel .utr-shortcode-item {
+  padding: 8px 0;
+}

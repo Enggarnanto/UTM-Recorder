@@ -1,6 +1,6 @@
 # Panduan UTM Traffic Recorder
 
-**Versi plugin:** 2.6.4
+**Versi plugin:** 2.6.11
 
 Tampilan dashboard dan CTA mengambang memakai Deep Navy, Electric Blue, dan aksen Electric Lime. Heading menggunakan Sora dan teks menggunakan Plus Jakarta Sans, dengan font sistem sebagai cadangan bila Google Fonts tidak tersedia. Warna akun WhatsApp yang sudah diatur sendiri tetap dipertahankan; warna bawaan akun baru adalah Electric Blue.
 
@@ -12,7 +12,7 @@ Plugin ini mencatat kunjungan website, parameter UTM, dan klik WhatsApp. Laporan
 
 ## Mulai cepat
 
-1. Di WordPress, buka **Plugins → Add New → Upload Plugin**. Unggah `utm-traffic-recorder.zip`, lalu aktifkan plugin.
+1. Di WordPress, buka **Plugins → Add New → Upload Plugin**. Unggah `utm-traffic-recorder.zip`, lalu pilih **Replace current with uploaded** jika ditawarkan untuk memperbarui versi lama. Aktifkan plugin bila perlu.
 2. Buka **Traffic Recorder → Settings**. Pilih UTM yang ingin dicatat, lalu klik **Simpan pengaturan**. Kelima UTM aktif secara bawaan.
 3. Buka **Traffic Recorder → CTA WA** untuk menambahkan akun admin WhatsApp, nomor, avatar, pesan, dan jadwal aktifnya.
 4. Buka website sebagai pengunjung yang **tidak login**, memakai tautan seperti:
@@ -39,6 +39,8 @@ Pengujian sebaiknya dilakukan di jendela privat. Kunjungan dan klik dari penggun
 | **Dashboard Chat WA** | Melihat jumlah klik, sesi yang mengklik, akun atau nomor teratas, serta rincian UTM tiap klik. |
 | **UTM Manager** | Melihat ID browser dan jumlah sesinya, lima peringkat UTM, detail kunjungan, filter, ekspor CSV, serta toggle Clean URL. |
 | **CTA WA** | Mengelola akun admin, avatar, pesan, jadwal, halaman penayangan, urutan akun, shortcode, tombol mengambang, serta seluruh format sumber pesan WA. |
+| **Sidebar editor Post / Page → Shortcode WA** | Menyalin shortcode akun untuk konten Post, Page, atau SEO Writer. |
+| **Tabel Price** | Segera hadir (Soon). |
 | **Settings** | Memilih kolom UTM yang dicatat dalam laporan kunjungan dan klik WA, pelacakan tautan WA yang sudah ada, dan Clean URL. |
 
 ## Mengatur pencatatan UTM
@@ -115,7 +117,7 @@ Di **CTA WA → Format sumber dalam pesan WA**, Anda dapat mengubah:
 - **Nilai yang ditambahkan**: Source, Medium, Campaign, Content, Term, Match Type, ID sesi, dan ID browser. Urutannya mengikuti daftar pilihan. ID memakai delapan karakter awal; nilai UTM tetap disimpan lengkap di laporan jika diaktifkan pada Settings.
 - **Pemisah antar nilai**, misalnya `+`, `-`, atau ` | `. Pemisah kosong menggabungkan nilai tanpa tanda. Jika semua pilihan nilai tidak dicentang, plugin tidak menambah baris sumber.
 
-Di bagian **Saat tidak ada UTM**, gunakan sakelar untuk mengaktifkan atau menonaktifkan baris sumber pengganti. Atur kata sebelum URL secara terpisah dari label UTM. Pilih **URL halaman pengunjung** agar link mengikuti halaman yang diklik, atau **Link khusus** untuk memakai satu URL tetap. Saat fitur dimatikan, pesan tanpa UTM tidak mendapat baris sumber. Pratinjau pada panel akun berubah langsung saat Anda mengatur format. Simpan pengaturan agar berlaku di halaman publik. Riwayat klik baru menyimpan baris sumber yang benar-benar ditambahkan, sehingga perubahan format berikutnya tidak mengubah tampilan sumber untuk klik lama.
+Di bagian **Saat tidak ada UTM**, gunakan sakelar untuk mengaktifkan atau menonaktifkan baris sumber pengganti. Atur kata sebelum URL secara terpisah dari label UTM. Pilih **URL halaman pengunjung** agar link mengikuti halaman yang diklik, atau **Link khusus** untuk memakai satu URL tetap. Anda juga dapat mencentang **ID sesi**, **ID browser**, keduanya, atau tidak satu pun. ID yang dipilih ditambahkan setelah URL dengan pemisah dan gaya huruf pada format sumber di atas; masing-masing memakai delapan karakter awal. Saat fitur dimatikan, pesan tanpa UTM tidak mendapat baris sumber. Pratinjau pada panel akun berubah langsung saat Anda mengatur format. Simpan pengaturan agar berlaku di halaman publik. Riwayat klik baru menyimpan baris sumber yang benar-benar ditambahkan, sehingga perubahan format berikutnya tidak mengubah tampilan sumber untuk klik lama.
 
 ## Membuat CTA WhatsApp
 
@@ -129,15 +131,27 @@ Di **Traffic Recorder → CTA WA**, isi panel **Tambah akun CTA**:
 
 Geser baris akun pada tabel untuk mengubah prioritas di daftar chat. Sakelar **Daftar chat** pada setiap baris langsung menyimpan apakah akun tampil di daftar mengambang; shortcode tetap bisa dipakai saat sakelar mati. Tombol mengambang hanya ada **satu**; ketika dibuka, tombol itu menampilkan daftar akun yang tersedia. Posisi kiri atau kanan, salam pembuka, serta tombol mengambang aktif atau tidak diatur pada bagian **Tombol mengambang & tautan WhatsApp**.
 
-Anda juga bisa memasang tombol akun tertentu pada konten halaman dengan shortcode:
+Anda juga bisa memasang tautan WhatsApp akun tertentu pada konten halaman dengan shortcode:
 
 ```text
 [utr_whatsapp id="1"]
 ```
 
-Ganti `1` dengan ID pada kolom **Shortcode** di tabel akun. Pengaturan hari aktif dan halaman berlaku untuk tombol mengambang maupun shortcode.
+Ganti `1` dengan ID pada kolom **Shortcode** di tabel akun, atau salin dari panel **Shortcode WA** di sidebar saat mengedit Post atau Page. Shortcode tampil sebagai pil kecil satu baris berisi gambar dan nama akun, mengikuti ukuran huruf konten. Jika akun belum memiliki gambar, ikon WhatsApp digunakan. Pengaturan hari aktif dan halaman berlaku untuk tombol mengambang maupun shortcode.
 
 ## Tautan WhatsApp yang sudah ada
+
+### Variabel dalam Pesan akun
+
+Di **CTA WA → Pesan akun**, pilih variabel lalu klik **Sisipkan variabel** untuk menambahkannya pada posisi kursor. Pilih salah satu nilai UTM, ID Sesi, ID Browser, atau Custom. Isi **Nilai custom** untuk akun tersebut jika menggunakan `{custom}`.
+
+Contoh pesan: `Halo, saya dari {utm_source}. Kode sesi: {session_id}. Promo: {custom}`. UTM mengikuti pilihan sumber localStorage/sessionStorage di CTA WA; ID menggunakan 8 karakter pertama. Variabel yang tidak tersedia menjadi kosong. Pratinjau menggunakan contoh UTM dan ID, serta nilai custom yang sedang diisi. Variabel juga diganti dalam pesan pada parameter `text` tautan lama; isi pesan lainnya tetap dipertahankan. Format `[{utm_source}]` menghasilkan, misalnya, `[gads]`.
+
+Variabel juga menerima kurung ganda (`{{utm_source}}`), spasi di dalam kurung, dan huruf besar/kecil. `{browser_id}` adalah alias `{visitor_id}`, sedangkan `{utm_matchtype}` adalah alias `{utm_match_type}`. Gaya huruf UTM dan ID mengikuti pengaturan Format sumber; nilai custom dipertahankan sesuai isian.
+
+Pesan pada tautan diprioritaskan, lalu pesan akun, lalu pesan default jika keduanya kosong. Tautan WA yang sudah ada diproses saat opsi **Tambahkan sumber ke tautan WA yang sudah ada** aktif. Tombol akun dan shortcode selalu diproses.
+
+Untuk mengganti salam atau judul daftar admin, gunakan **Simpan posisi, salam & tampilan tombol**. Tombol ini menyimpan tampilan tanpa memerlukan validasi URL sumber. Tombol **Simpan pengaturan CTA WA** menyimpan seluruh pengaturan, termasuk posisi tombol, salam, pesan default, dan sumber. Perubahan pengaturan CTA WA serta versi plugin memicu pembersihan cache LiteSpeed bila tersedia. Versi aktif ditampilkan pada header halaman plugin.
 
 Plugin mengenali tautan seperti:
 
@@ -175,6 +189,7 @@ UTM dari tautan awal ditangkap sebelum URL dibersihkan, lalu dipakai untuk penca
 - **Tampilan halaman** menghitung halaman yang dibuka, sehingga satu sesi dapat memiliki beberapa tampilan halaman.
 - **Top Source/Medium/Campaign/Content/Terms** di UTM Manager menghitung sesi unik sesuai filter tanggal dan sumber.
 - **Top Akun/Nomor** di Dashboard Chat WA diurutkan berdasarkan sesi unik yang mengklik.
+- UTM Manager dan Dashboard Chat WA menyediakan periode cepat **Hari ini**, **7 hari**, **12 hari**, **1 bulan** (30 hari), dan **3 bulan** (90 hari). Hari ini termasuk dalam setiap periode; filter sumber, ID browser (UTM Manager), dan akun (Chat WA) tetap dipertahankan.
 - Filter di UTM Manager dapat dibatasi menurut tanggal, `utm_source`, dan ID browser. Klik **Ekspor CSV** untuk mengunduh baris sesuai filter. Waktu dalam CSV memakai UTC; tampilan dashboard memakai zona waktu WordPress.
 - Kolom **URL perujuk** menampilkan URL lengkap bila browser memberikannya. Kebijakan perujuk situs asal dapat membatasi nilainya menjadi domain saja atau kosong. Baris sebelum versi 2.1.0 tetap menampilkan domain yang sebelumnya tercatat; URL lengkapnya tidak dapat dipulihkan. CSV menyertakan domain dan URL perujuk sebagai kolom terpisah.
 - Kolom **Match Type** memuat nilai dari `utm_match_type` atau `utm_matchtype`. Dashboard Chat WA juga menampilkan ID sesi agar kode pada pesan dapat dicocokkan dengan klik dan kunjungan.

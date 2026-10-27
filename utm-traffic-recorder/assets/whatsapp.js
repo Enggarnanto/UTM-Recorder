@@ -8,6 +8,7 @@
   var fields = Array.isArray(config.fields) ? allFields.filter(function (field) { return config.fields.indexOf(field) !== -1; }) : allFields;
   var sourceChoices = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'utm_match_type', 'session_id', 'visitor_id'];
   var sourceFields = Array.isArray(config.sourceFields) ? sourceChoices.filter(function (field) { return config.sourceFields.indexOf(field) !== -1; }) : ['utm_source', 'session_id'];
+  var fallbackIdFields = Array.isArray(config.fallbackIdFields) ? ['session_id', 'visitor_id'].filter(function (field) { return config.fallbackIdFields.indexOf(field) !== -1; }) : [];
   var trackLinks = typeof config.trackLinks === 'boolean' ? config.trackLinks : !!config.enhanceLinks;
   var originals = new WeakMap();
 
@@ -21,13 +22,30 @@
 
   function configuredMessage(link, account) {
     var data = link.dataset || {};
+    var message = '';
     if (data.utrAccount) {
       if (typeof data.utrMessageEncoded === 'string') {
-        try { return decodeURIComponent(data.utrMessageEncoded); } catch (error) { /* Fall back to the plain attribute. */ }
+        try { message = decodeURIComponent(data.utrMessageEncoded); } catch (error) { message = data.utrMessage || ''; }
+      } else {
+        message = data.utrMessage || '';
       }
-      return data.utrMessage || '';
     }
-    return account && account.message || config.message || '';
+    if (!messageParagraphs(message)) message = account && account.message || '';
+    return messageParagraphs(message) ? message : config.message || '';
+  }
+
+  function resolveMessageVariables(message, account) {
+    var values = currentUtm(config.sourceMode === 'session' ? 'session' : 'local');
+    var ids = trackingIds();
+    values.session_id = ids.session_id;
+    values.visitor_id = ids.visitor_id;
+    values.custom = account && account.message_custom || '';
+    return message.replace(/\{\{\s*(utm_source|utm_medium|utm_campaign|utm_term|utm_content|utm_match_type|utm_matchtype|session_id|visitor_id|browser_id|custom)\s*\}\}|\{\s*(utm_source|utm_medium|utm_campaign|utm_term|utm_content|utm_match_type|utm_matchtype|session_id|visitor_id|browser_id|custom)\s*\}/gi, function (token, doubleKey, singleKey) {
+      var key = (doubleKey || singleKey).toLowerCase();
+      if (key === 'browser_id') key = 'visitor_id';
+      if (key === 'utm_matchtype') key = 'utm_match_type';
+      return key === 'custom' ? values.custom : formatSourceValue(values[key] || '');
+    });
   }
 
   function selectedUtm(raw) {
@@ -76,14 +94,7 @@
     return {};
   }
 
-  function sourceText() {
-    if (!sourceFields.length) return '';
-    var utm = currentUtm(config.sourceMode === 'session' ? 'session' : 'local');
-    var parts = [];
-    var selectedUtmFields = sourceFields.filter(function (field) { return allFields.indexOf(field) !== -1; });
-    selectedUtmFields.forEach(function (field) {
-      if (utm[field]) parts.push(formatSourceValue(utm[field]));
-    });
+  function trackingIds() {
     var session = window.utrTracking && window.utrTracking.session_id || '';
     var visitor = window.utrTracking && window.utrTracking.visitor_id || '';
     if (!session || !visitor) {
@@ -97,8 +108,20 @@
       } catch (error) { /* Storage can be disabled. */ }
     }
     var validId = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
-    if (sourceFields.indexOf('session_id') !== -1 && validId.test(session)) parts.push(formatSourceValue(session.slice(0, 8)));
-    if (sourceFields.indexOf('visitor_id') !== -1 && validId.test(visitor)) parts.push(formatSourceValue(visitor.slice(0, 8)));
+    return {session_id: validId.test(session) ? session.slice(0, 8) : '', visitor_id: validId.test(visitor) ? visitor.slice(0, 8) : ''};
+  }
+
+  function sourceText() {
+    if (!sourceFields.length) return '';
+    var utm = currentUtm(config.sourceMode === 'session' ? 'session' : 'local');
+    var parts = [];
+    var selectedUtmFields = sourceFields.filter(function (field) { return allFields.indexOf(field) !== -1; });
+    selectedUtmFields.forEach(function (field) {
+      if (utm[field]) parts.push(formatSourceValue(utm[field]));
+    });
+    var ids = trackingIds();
+    if (sourceFields.indexOf('session_id') !== -1 && ids.session_id) parts.push(formatSourceValue(ids.session_id));
+    if (sourceFields.indexOf('visitor_id') !== -1 && ids.visitor_id) parts.push(formatSourceValue(ids.visitor_id));
     var separator = typeof config.sourceSeparator === 'string' ? config.sourceSeparator : '+';
     return parts.join(separator);
   }
@@ -127,7 +150,13 @@
         } catch (error) { /* Use the current page URL. */ }
       }
       var fallbackLabel = String(config.fallbackLabel || 'Sumber').trim().replace(/[\s:]+$/, '') || 'Sumber';
-      return fallbackLabel + ': ' + fallbackUrl;
+      var ids = trackingIds();
+      var values = [fallbackUrl];
+      fallbackIdFields.forEach(function (field) {
+        if (ids[field]) values.push(formatSourceValue(ids[field]));
+      });
+      var separator = typeof config.sourceSeparator === 'string' ? config.sourceSeparator : '+';
+      return fallbackLabel + ': ' + values.join(separator);
     }
     var value = sourceText();
     if (!value) return '';
@@ -166,8 +195,12 @@
     if (!isWhatsAppUrl(url)) return;
 
     var existing = url.searchParams.get('text');
-    var account = accountForPhone(phoneFromUrl(url));
-    var message = messageParagraphs(existing && existing.trim() ? existing : configuredMessage(link, account));
+    var account = link.dataset && link.dataset.utrAccount
+      ? (config.accounts || []).find(function (item) { return String(item.id) === String(link.dataset.utrAccount); }) || accountForPhone(phoneFromUrl(url))
+      : accountForPhone(phoneFromUrl(url));
+    var hasExistingMessage = existing && existing.trim();
+    var message = messageParagraphs(hasExistingMessage ? existing : configuredMessage(link, account));
+    message = resolveMessageVariables(message, account).trim();
     var line = sourceLine();
     var finalMessage = message + (message && line ? '\n\n' : '') + line;
     if (finalMessage) url.searchParams.set('text', finalMessage);

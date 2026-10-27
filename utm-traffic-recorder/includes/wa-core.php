@@ -143,6 +143,14 @@ function utr_wa_button_markup( $account, $mode = 'shortcode' ) {
 	$foreground = isset( $account['text_color'] ) ? sanitize_hex_color( $account['text_color'] ) : '';
 	$style = '--utr-wa-bg:' . ( $background ?: '#2563eb' ) . ';--utr-wa-text:' . ( $foreground ?: '#ffffff' ) . ';';
 	$name = isset( $account['name'] ) ? $account['name'] : 'WhatsApp';
+	if ( 'shortcode' === $mode ) {
+		$avatar_id = isset( $account['avatar_id'] ) ? absint( $account['avatar_id'] ) : 0;
+		$avatar = $avatar_id ? wp_get_attachment_image( $avatar_id, 'thumbnail', false, array( 'class' => 'utr-wa-shortcode-avatar', 'alt' => '', 'width' => '24', 'height' => '24', 'sizes' => '24px' ) ) : '';
+		if ( ! $avatar ) {
+			$avatar = '<img class="utr-wa-shortcode-avatar" src="' . esc_url( plugins_url( 'assets/whatsapp-logo.svg', UTR_FILE ) ) . '" alt="" width="24" height="24">';
+		}
+		return '<a class="utr-wa-shortcode" href="' . esc_url( 'https://wa.me/' . $phone ) . '" target="_blank" rel="noopener noreferrer" data-utr-account="' . esc_attr( $id ) . '" data-utr-type="shortcode" data-utr-message-encoded="' . esc_attr( rawurlencode( isset( $account['message'] ) ? $account['message'] : '' ) ) . '" style="' . esc_attr( $style ) . '" aria-label="Chat WhatsApp dengan ' . esc_attr( $name ) . '">' . wp_kses_post( $avatar ) . '<span class="utr-wa-shortcode-name">' . esc_html( $name ) . '</span></a>';
+	}
 	$title = isset( $account['title'] ) ? $account['title'] : '';
 	$avatar_id = isset( $account['avatar_id'] ) ? absint( $account['avatar_id'] ) : 0;
 	$avatar = $avatar_id ? wp_get_attachment_image( $avatar_id, 'thumbnail', false, array( 'class' => 'utr-wa-avatar', 'alt' => '', 'width' => '42', 'height' => '42', 'sizes' => '42px', 'loading' => 'eager', 'decoding' => 'sync' ) ) : '';
@@ -195,7 +203,7 @@ function utr_wa_render_floating_accounts() {
 	?>
 	<div class="utr-wa-widget utr-wa-widget-<?php echo esc_attr( $position ); ?>" id="utr-wa-widget" style="<?php echo esc_attr( $launcher_style ); ?>">
 		<div class="utr-wa-panel" id="utr-wa-panel" hidden>
-			<div class="utr-wa-panel-header"><div><strong>Chat dengan kami</strong><?php if ( $greeting ) : ?><p><?php echo nl2br( esc_html( $greeting ) ); ?></p><?php endif; ?></div><button class="utr-wa-close" type="button" aria-label="Tutup daftar WhatsApp">&times;</button></div>
+			<div class="utr-wa-panel-header"><div><?php if ( trim( $settings['panel_title'] ) ) : ?><strong><?php echo esc_html( $settings['panel_title'] ); ?></strong><?php endif; ?><?php if ( $greeting ) : ?><p><?php echo nl2br( esc_html( $greeting ) ); ?></p><?php endif; ?></div><button class="utr-wa-close" type="button" aria-label="Tutup daftar WhatsApp">&times;</button></div>
 			<div class="utr-wa-panel-list"><?php echo implode( '', $items ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped by utr_wa_button_markup(). ?></div>
 			<div class="utr-wa-panel-footer">&copy; <?php echo esc_html( wp_date( 'Y' ) ); ?> <a href="https://www.mtalkblog.com/p/utm-traffic-recorder-dokumentasi.html" target="_blank" rel="noopener noreferrer">UTM Trafik Manager</a></div>
 		</div>

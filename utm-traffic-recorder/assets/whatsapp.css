@@ -10,10 +10,14 @@
 .utr-wa-copy strong, .utr-wa-copy small { color: inherit; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .utr-wa-copy strong { font-size: 14px; }
 .utr-wa-copy small { font-size: 11px; opacity: .9; }
-.utr-wa-shortcode { margin: 4px 0; }
+.utr-wa-shortcode { display: inline-flex; align-items: center; vertical-align: middle; gap: .35em; max-width: 100%; margin: 0; padding: .18em .6em .18em .2em; border: 0; border-radius: 999px; background: var(--utr-wa-bg, #2563eb); box-shadow: none; color: var(--utr-wa-text, #fff); font: inherit; line-height: 1.2; text-decoration: none; white-space: nowrap; }
+.utr-wa-shortcode:hover, .utr-wa-shortcode:focus { color: var(--utr-wa-text, #fff); text-decoration: none; filter: brightness(.94); }
+.utr-wa-shortcode:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+.utr-wa-shortcode .utr-wa-shortcode-avatar { display: block; flex: none; width: 1.25em; height: 1.25em; max-width: none; margin: 0; padding: 0; border: 0; border-radius: 50%; object-fit: cover; box-shadow: none; }
+.utr-wa-shortcode-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: inherit; font: inherit; }
 .utr-wa-widget { position: fixed; bottom: max(18px, env(safe-area-inset-bottom)); z-index: 99999; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; width: min(360px, calc(100vw - 28px)); font: 14px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-.utr-wa-widget-right { right: max(18px, env(safe-area-inset-right)); }
-.utr-wa-widget-left { left: max(18px, env(safe-area-inset-left)); align-items: flex-start; }
+#utr-wa-widget.utr-wa-widget-right { left: auto; right: max(18px, env(safe-area-inset-right)); align-items: flex-end; }
+#utr-wa-widget.utr-wa-widget-left { right: auto; left: max(18px, env(safe-area-inset-left)); align-items: flex-start; }
 .utr-wa-panel[hidden] { display: none !important; }
 .utr-wa-panel { display: flex; flex-direction: column; width: 100%; max-height: min(70vh, 560px); overflow: hidden; border-radius: 17px; background: #fff; color: #183026; box-shadow: 0 14px 42px rgba(0, 40, 23, .24); }
 .utr-wa-panel-header { display: flex; flex: none; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 19px 20px; background: #087f47; color: #fff; }
@@ -28,7 +32,7 @@
 .utr-wa-launcher { display: inline-flex; align-items: center; gap: 9px; border: 0; border-radius: 999px; padding: 13px 18px; background: #087f47; box-shadow: 0 7px 24px rgba(0, 70, 37, .3); color: #fff; font: 700 14px/1.2 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; cursor: pointer; }
 .utr-wa-launcher:hover { background: #06693b; }
 .utr-wa-launcher svg { display: block; flex: none; }
-@media (max-width: 600px) { .utr-wa-widget { width: min(340px, calc(100vw - 28px)); bottom: max(14px, env(safe-area-inset-bottom)); } .utr-wa-widget-right { right: max(14px, env(safe-area-inset-right)); } .utr-wa-widget-left { left: max(14px, env(safe-area-inset-left)); } }
+@media (max-width: 600px) { .utr-wa-widget { width: min(340px, calc(100vw - 28px)); bottom: max(14px, env(safe-area-inset-bottom)); } #utr-wa-widget.utr-wa-widget-right { left: auto; right: max(14px, env(safe-area-inset-right)); } #utr-wa-widget.utr-wa-widget-left { right: auto; left: max(14px, env(safe-area-inset-left)); } }
 
 /* UTM Trafik Manager brand theme. Saved per-account colors remain customizable. */
 .utr-wa-account {

@@ -11,6 +11,7 @@ $click_table = $wpdb->prefix . 'utm_traffic_wa_clicks';
 $wpdb->query( "DROP TABLE IF EXISTS {$click_table}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 wp_clear_scheduled_hook( 'utr_daily_cleanup' );
 delete_option( 'utr_whatsapp_settings' );
+delete_option( 'utr_loaded_version' );
 delete_option( 'utr_wa_accounts' );
 delete_option( 'utr_wa_schema_version' );
 delete_option( 'utr_wa_next_account_id' );

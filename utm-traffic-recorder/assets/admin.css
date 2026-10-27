@@ -363,6 +363,11 @@
 .utr-admin .utr-header h1 { color: #fff; font-size: clamp(25px, 2.4vw, 34px); letter-spacing: -.045em; }
 .utr-admin .utr-header .utr-eyebrow { color: var(--utr-lime); letter-spacing: .16em; }
 .utr-admin .utr-header .utr-subtitle { color: #dbeafe; max-width: 68ch; line-height: 1.55; }
+.utr-admin .utr-header h1 { display: inline-block; }
+.utr-admin .utr-version-badge { display: inline-block; margin: 0 0 0 12px; padding: 4px 9px; border: 1px solid rgba(255,255,255,.3); border-radius: 999px; color: #fff; background: rgba(255,255,255,.08); font: 600 12px/1.4 system-ui, sans-serif; vertical-align: middle; white-space: nowrap; }
+#wpbody-content .utr-admin .notice { color: #1e293b; background: #fff; }
+#wpbody-content .utr-admin .notice p { color: #1e293b; font-size: 14px; line-height: 1.6; }
+#wpbody-content .utr-admin .wp-header-end { margin: 0; border: 0; }
 .utr-admin .utr-panel,
 .utr-admin .utr-stat { border-color: var(--utr-border); border-radius: 16px; box-shadow: 0 8px 24px rgba(20, 33, 61, .045); }
 .utr-admin .utr-panel-heading h2,

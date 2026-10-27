@@ -2,7 +2,7 @@
 /**
  * Plugin Name: UTM Traffic Recorder
  * Description: Records pageviews and UTM parameters, with a private WordPress admin report and CSV export.
- * Version: 2.6.4
+ * Version: 2.6.11
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Plugin URI: https://www.mtalkblog.com
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'UTR_VERSION', '2.6.4' );
+define( 'UTR_VERSION', '2.6.11' );
 define( 'UTR_FILE', __FILE__ );
 require_once __DIR__ . '/includes/wa-core.php';
 require_once __DIR__ . '/includes/wa-admin.php';
@@ -229,16 +229,101 @@ function utr_admin_menu() {
 	add_submenu_page( 'utm-traffic-recorder', 'Dashboard Chat WA', 'Dashboard Chat WA', 'manage_options', 'utr-wa-dashboard', 'utr_render_wa_dashboard' );
 	add_submenu_page( 'utm-traffic-recorder', 'UTM Manager', 'UTM Manager', 'manage_options', 'utr-utm-manager', 'utr_render_utm_manager' );
 	add_submenu_page( 'utm-traffic-recorder', 'CTA WA', 'CTA WA', 'manage_options', 'utr-whatsapp', 'utr_render_cta_manager' );
+	add_submenu_page( 'utm-traffic-recorder', 'Tabel Price', 'Tabel Price', 'manage_options', 'utr-price-table', 'utr_render_price_table' );
 	add_submenu_page( 'utm-traffic-recorder', 'Settings', 'Settings', 'manage_options', 'utr-settings', 'utr_render_feature_settings' );
 }
 add_action( 'admin_menu', 'utr_admin_menu' );
+
+function utr_add_shortcode_metabox( $post_type, $post ) {
+	if ( ! in_array( $post_type, array( 'post', 'page' ), true ) ) {
+		return;
+	}
+	if ( function_exists( 'use_block_editor_for_post' ) && use_block_editor_for_post( $post ) ) {
+		return;
+	}
+	add_meta_box( 'utr-wa-shortcodes', 'Shortcode WA', 'utr_render_shortcode_metabox', $post_type, 'side', 'default' );
+}
+add_action( 'add_meta_boxes', 'utr_add_shortcode_metabox', 10, 2 );
+
+function utr_shortcode_items() {
+	$items = array();
+	foreach ( utr_wa_accounts() as $account ) {
+		$id = isset( $account['id'] ) ? absint( $account['id'] ) : 0;
+		if ( ! $id ) {
+			continue;
+		}
+		$items[] = array(
+			'name'      => isset( $account['name'] ) ? (string) $account['name'] : '',
+			'shortcode' => '[utr_whatsapp id="' . $id . '"]',
+		);
+	}
+	return $items;
+}
+
+function utr_render_shortcode_metabox() {
+	$accounts = utr_wa_accounts();
+	?>
+	<div class="utr-shortcode-sidebar">
+		<p>Salin lalu tempel di teks editor atau berikan kepada SEO Writer.</p>
+		<?php if ( $accounts ) : ?>
+			<?php foreach ( utr_shortcode_items() as $item ) : ?>
+				<div class="utr-shortcode-item">
+					<strong><?php echo esc_html( $item['name'] ); ?></strong>
+					<code><?php echo esc_html( $item['shortcode'] ); ?></code>
+					<button type="button" class="button button-small utr-copy-shortcode" data-shortcode="<?php echo esc_attr( $item['shortcode'] ); ?>">Salin</button>
+				</div>
+			<?php endforeach; ?>
+			<p id="utr-copy-status" class="screen-reader-text" role="status" aria-live="polite"></p>
+		<?php else : ?>
+			<p>Belum ada akun WhatsApp. Tambahkan akun melalui Traffic Recorder → CTA WA.</p>
+		<?php endif; ?>
+	</div>
+	<?php
+}
+
+function utr_render_price_table() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'Tidak diizinkan.' );
+	}
+	?>
+	<div class="wrap utr-admin">
+		<header class="utr-header"><div><p class="utr-eyebrow">TRAFFIC RECORDER</p><h1>Tabel Price</h1><?php utr_render_header_version(); ?><p class="utr-subtitle">Soon</p></div></header><hr class="wp-header-end">
+		<section class="utr-panel"><h2>Tabel Price</h2><p>Fitur tabel price segera hadir.</p></section>
+	</div>
+	<?php
+}
 
 function utr_render_brand_footer() {
 	echo '<p class="utr-brand-footer">&copy; ' . esc_html( wp_date( 'Y' ) ) . ' <a href="https://www.mtalkblog.com/p/utm-traffic-recorder-dokumentasi.html" target="_blank" rel="noopener noreferrer">UTM Trafik Manager</a></p>';
 }
 
+function utr_render_header_version() {
+	echo '<span class="utr-version-badge">v' . esc_html( UTR_VERSION ) . '</span>';
+}
+
+function utr_invalidate_wa_cache( $option ) {
+	if ( ! in_array( $option, array( 'utr_whatsapp_settings', 'utr_wa_accounts', 'utr_wa_source_mode' ), true ) ) {
+		return;
+	}
+	static $purged = false;
+	if ( ! $purged ) {
+		$purged = true;
+		do_action( 'litespeed_purge_all', 'UTM Traffic Recorder: WhatsApp settings changed' );
+	}
+}
+add_action( 'updated_option', 'utr_invalidate_wa_cache' );
+add_action( 'added_option', 'utr_invalidate_wa_cache' );
+
+function utr_refresh_version_cache() {
+	if ( current_user_can( 'manage_options' ) && UTR_VERSION !== get_option( 'utr_loaded_version' ) ) {
+		update_option( 'utr_loaded_version', UTR_VERSION, false );
+		utr_invalidate_wa_cache( 'utr_whatsapp_settings' );
+	}
+}
+add_action( 'admin_init', 'utr_refresh_version_cache' );
+
 function utr_enqueue_admin_style( $hook ) {
-	if ( false !== strpos( $hook, 'utm-traffic-recorder' ) || false !== strpos( $hook, 'utr-utm-manager' ) || false !== strpos( $hook, 'utr-whatsapp' ) || false !== strpos( $hook, 'utr-wa-dashboard' ) || false !== strpos( $hook, 'utr-settings' ) ) {
+	if ( false !== strpos( $hook, 'utm-traffic-recorder' ) || false !== strpos( $hook, 'utr-utm-manager' ) || false !== strpos( $hook, 'utr-whatsapp' ) || false !== strpos( $hook, 'utr-wa-dashboard' ) || false !== strpos( $hook, 'utr-settings' ) || false !== strpos( $hook, 'utr-price-table' ) ) {
 		wp_enqueue_style( 'utr-brand-fonts', 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap', array(), null );
 		wp_enqueue_style( 'utr-admin', plugins_url( 'assets/admin.css', __FILE__ ), array( 'utr-brand-fonts' ), UTR_VERSION );
 	}
@@ -252,6 +337,23 @@ function utr_enqueue_admin_style( $hook ) {
 	}
 }
 add_action( 'admin_enqueue_scripts', 'utr_enqueue_admin_style' );
+
+function utr_enqueue_shortcode_editor_assets( $hook ) {
+	if ( 'post.php' !== $hook && 'post-new.php' !== $hook ) {
+		return;
+	}
+	$screen = get_current_screen();
+	if ( ! $screen || ! in_array( $screen->post_type, array( 'post', 'page' ), true ) ) {
+		return;
+	}
+	wp_enqueue_style( 'utr-shortcode-sidebar', plugins_url( 'assets/shortcode-sidebar.css', __FILE__ ), array(), UTR_VERSION );
+	wp_enqueue_script( 'utr-shortcode-copy', plugins_url( 'assets/shortcode-copy.js', __FILE__ ), array(), UTR_VERSION, true );
+	if ( $screen->is_block_editor() ) {
+		wp_enqueue_script( 'utr-shortcode-block-sidebar', plugins_url( 'assets/shortcode-block-sidebar.js', __FILE__ ), array( 'wp-plugins', 'wp-editor', 'wp-edit-post', 'wp-element' ), UTR_VERSION, true );
+		wp_add_inline_script( 'utr-shortcode-block-sidebar', 'window.utrShortcodeItems = ' . wp_json_encode( utr_shortcode_items() ) . ';', 'before' );
+	}
+}
+add_action( 'admin_enqueue_scripts', 'utr_enqueue_shortcode_editor_assets' );
 
 function utr_filters() {
 	$today = wp_date( 'Y-m-d' );
@@ -290,6 +392,29 @@ function utr_where( $filters ) {
 		$where .= $wpdb->prepare( ' AND visitor_id = %s', $visitor_id );
 	}
 	return $where;
+}
+
+function utr_quick_ranges() {
+	$today = new DateTimeImmutable( 'today', wp_timezone() );
+	return array(
+		array( 'label' => 'Hari ini', 'days' => 1, 'from' => $today->format( 'Y-m-d' ) ),
+		array( 'label' => '7 hari', 'days' => 7, 'from' => $today->modify( '-6 days' )->format( 'Y-m-d' ) ),
+		array( 'label' => '12 hari', 'days' => 12, 'from' => $today->modify( '-11 days' )->format( 'Y-m-d' ) ),
+		array( 'label' => '1 bulan', 'days' => 30, 'from' => $today->modify( '-29 days' )->format( 'Y-m-d' ) ),
+		array( 'label' => '3 bulan', 'days' => 90, 'from' => $today->modify( '-89 days' )->format( 'Y-m-d' ) ),
+	);
+}
+
+function utr_render_quick_ranges( $base, $filters, $extra_args = array() ) {
+	$today = wp_date( 'Y-m-d' );
+	echo '<div class="utr-quick-ranges" aria-label="Pilih periode cepat">';
+	foreach ( utr_quick_ranges() as $range ) {
+		$args = array_merge( $extra_args, array( 'from' => $range['from'], 'to' => $today, 'paged' => false ) );
+		$url = add_query_arg( $args, $base );
+		$active = $filters[0] === $range['from'] && $filters[1] === $today;
+		echo '<a class="utr-range' . ( $active ? ' is-active' : '' ) . '" href="' . esc_url( $url ) . '" title="' . esc_attr( $range['days'] . ' hari termasuk hari ini' ) . '"' . ( $active ? ' aria-current="true"' : '' ) . '>' . esc_html( $range['label'] ) . '</a>';
+	}
+	echo '</div>';
 }
 
 function utr_query_rows( $filters, $limit = 50, $offset = 0 ) {
@@ -334,11 +459,11 @@ function utr_render_admin() {
 		<header class="utr-header">
 			<div>
 				<p class="utr-eyebrow">ANALITIK WEBSITE</p>
-				<h1>UTM Traffic Recorder</h1>
+				<h1>UTM Traffic Recorder</h1><?php utr_render_header_version(); ?>
 				<p class="utr-subtitle">Pantau kunjungan dan lihat dari mana pengunjung datang.</p>
 			</div>
 			<a class="button button-primary utr-export" href="<?php echo esc_url( $manager_url ); ?>">Lihat detail UTM <span class="dashicons dashicons-arrow-right-alt" aria-hidden="true"></span></a>
-		</header>
+		</header><hr class="wp-header-end">
 
 		<section class="utr-panel utr-filter-panel" aria-labelledby="utr-filter-heading">
 			<div class="utr-panel-heading"><h2 id="utr-filter-heading">Periode laporan</h2><span>Zona waktu: <?php echo esc_html( $timezone ); ?></span></div>
@@ -432,7 +557,7 @@ function utr_render_utm_manager() {
 	}
 	?>
 	<div class="wrap utr-admin">
-		<header class="utr-header"><div><p class="utr-eyebrow">DETAIL KUNJUNGAN</p><h1>UTM Manager</h1><p class="utr-subtitle">Periksa semua parameter UTM yang tercatat pada setiap halaman.</p></div><a class="button button-primary utr-export" href="<?php echo esc_url( $export ); ?>"><span class="dashicons dashicons-download" aria-hidden="true"></span> Ekspor CSV</a></header>
+		<header class="utr-header"><div><p class="utr-eyebrow">DETAIL KUNJUNGAN</p><h1>UTM Manager</h1><?php utr_render_header_version(); ?><p class="utr-subtitle">Periksa semua parameter UTM yang tercatat pada setiap halaman.</p></div><a class="button button-primary utr-export" href="<?php echo esc_url( $export ); ?>"><span class="dashicons dashicons-download" aria-hidden="true"></span> Ekspor CSV</a></header><hr class="wp-header-end">
 		<?php if ( isset( $_GET['utr_notice'] ) && 'url_saved' === sanitize_key( wp_unslash( $_GET['utr_notice'] ) ) ) : ?><div class="notice notice-success is-dismissible"><p>Pengaturan tampilan URL berhasil disimpan.</p></div><?php endif; ?>
 		<section class="utr-panel utr-settings-panel utr-utm-url-panel" aria-labelledby="utr-url-heading">
 			<h2 id="utr-url-heading">Tampilan URL pengunjung</h2>
@@ -446,6 +571,7 @@ function utr_render_utm_manager() {
 		</section>
 		<section class="utr-panel utr-filter-panel" aria-labelledby="utr-manager-filter-heading">
 			<div class="utr-panel-heading"><h2 id="utr-manager-filter-heading">Filter data</h2><span>Zona waktu: <?php echo esc_html( wp_timezone_string() ); ?></span></div>
+			<?php utr_render_quick_ranges( $base, $filters, array( 'source' => $filters[2], 'visitor_id' => $filters[3], 'browser_limit' => $browser_limit ) ); ?>
 			<form class="utr-filters utr-manager-filters" method="get">
 				<input type="hidden" name="page" value="utr-utm-manager">
 				<input type="hidden" name="browser_limit" value="<?php echo esc_attr( $browser_limit ); ?>">
@@ -512,6 +638,7 @@ function utr_whatsapp_settings() {
 		'label'         => 'Chat WhatsApp',
 		'message'       => 'Halo, saya ingin bertanya tentang produk Anda.',
 		'greeting'      => 'Halo! Pilih admin yang ingin Anda hubungi.',
+		'panel_title'   => 'Chat dengan kami',
 		'floating_position' => 'right',
 		'floating_bg_color' => '#14213d',
 		'floating_text_color' => '#ffffff',
@@ -525,6 +652,7 @@ function utr_whatsapp_settings() {
 		'fallback_label' => 'Sumber',
 		'fallback_url_mode' => 'page',
 		'fallback_custom_url' => '',
+		'fallback_id_fields' => array(),
 	);
 	$stored = get_option( 'utr_whatsapp_settings', array() );
 	return wp_parse_args( is_array( $stored ) ? $stored : array(), $defaults );
@@ -573,7 +701,7 @@ function utr_render_whatsapp_admin() {
 	$notice = isset( $_GET['utr_notice'] ) && is_string( $_GET['utr_notice'] ) ? sanitize_key( wp_unslash( $_GET['utr_notice'] ) ) : '';
 	?>
 	<div class="wrap utr-admin">
-		<header class="utr-header"><div><p class="utr-eyebrow">PENGATURAN TOMBOL</p><h1>CTA WhatsApp</h1><p class="utr-subtitle">Tampilkan tombol chat dan sertakan sumber kunjungan dalam pesan.</p></div></header>
+		<header class="utr-header"><div><p class="utr-eyebrow">PENGATURAN TOMBOL</p><h1>CTA WhatsApp</h1><?php utr_render_header_version(); ?><p class="utr-subtitle">Tampilkan tombol chat dan sertakan sumber kunjungan dalam pesan.</p></div></header><hr class="wp-header-end">
 		<?php if ( 'saved' === $notice ) : ?><div class="notice notice-success is-dismissible"><p>Pengaturan WhatsApp berhasil disimpan.</p></div><?php endif; ?>
 		<?php if ( 'invalid_phone' === $notice ) : ?><div class="notice notice-error"><p>Masukkan nomor WhatsApp internasional yang valid, diawali kode negara (contoh format: 62 diikuti nomor Anda).</p></div><?php endif; ?>
 		<div class="utr-settings-grid">
@@ -625,7 +753,7 @@ function utr_enqueue_whatsapp_assets() {
 	$known_accounts = array();
 	foreach ( $accounts as $account ) {
 		if ( ! empty( $account['id'] ) && ! empty( $account['phone'] ) && utr_valid_whatsapp_phone( $account['phone'] ) ) {
-			$known_accounts[] = array( 'id' => absint( $account['id'] ), 'phone' => $account['phone'], 'message' => isset( $account['message'] ) ? $account['message'] : '' );
+			$known_accounts[] = array( 'id' => absint( $account['id'] ), 'phone' => $account['phone'], 'message' => isset( $account['message'] ) ? $account['message'] : '', 'message_custom' => isset( $account['message_custom'] ) ? $account['message_custom'] : '' );
 		}
 	}
 	wp_add_inline_script( 'utr-whatsapp', 'window.utrWhatsappConfig = ' . wp_json_encode( array(
@@ -642,6 +770,7 @@ function utr_enqueue_whatsapp_assets() {
 		'fallbackLabel' => $settings['fallback_label'],
 		'fallbackUrlMode' => $settings['fallback_url_mode'],
 		'fallbackCustomUrl' => $settings['fallback_custom_url'],
+		'fallbackIdFields' => $settings['fallback_id_fields'],
 		'accounts'       => $known_accounts,
 		'recordEndpoint' => is_user_logged_in() ? '' : esc_url_raw( rest_url( 'utm-recorder/v1/wa-click' ) ),
 	), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ) . ';', 'before' );
