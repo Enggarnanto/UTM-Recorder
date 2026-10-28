@@ -1,6 +1,6 @@
 # Sinkronisasi klik WA ke Google Sheets — plugin 2.6.14
 
-Satu baris adalah satu klik WhatsApp yang berhasil dicatat plugin. Semua field tabel klik dikirim, ditambah identitas website dan waktu penerimaan. Pageview tidak dikirim. Nomor WA adalah nomor tujuan/admin, bukan nomor pengunjung. Waktu klik tetap UTC; ID browser dan sesi dikirim lengkap.
+Satu baris adalah satu klik WhatsApp yang berhasil dicatat plugin. Semua field tabel klik dikirim, ditambah identitas website dan waktu penerimaan. Pageview tidak dikirim. Nomor WA adalah nomor tujuan/admin, bukan nomor pengunjung. Receiver versi 3 menampilkan waktu klik dan penerimaan dalam WIB (Asia/Jakarta, UTC+7), berformat `yyyy-MM-dd HH:mm:ss`. Data asal WordPress tetap UTC; ID browser dan sesi dikirim lengkap.
 
 ## Google Sheets dan Apps Script
 
@@ -10,8 +10,12 @@ Satu baris adalah satu klik WhatsApp yang berhasil dicatat plugin. Semua field t
 4. Untuk tiap website, buat property `SITE_KEY_<ID website>`. Contoh: `SITE_KEY_web_a`. Value adalah kunci acak unik sepanjang 32–512 karakter tanpa spasi. Gunakan password generator. Jangan masukkan kunci asli ke kode, GitHub, atau halaman publik.
 5. Dari editor, jalankan `setupSheet` dan berikan izin. Tab **Data Klik WA** dibuat otomatis. Header lama dari receiver awal diperbarui tanpa mengubah data klik. Jangan mengubah urutan atau nama kolom secara manual.
 6. **Deploy > New deployment > Web app**. Pilih **Execute as: Me** dan **Who has access: Anyone**. Spreadsheet tetap privat. Salin URL yang berakhir `/exec`.
-7. Jika sudah pernah deploy: **Deploy > Manage deployments > Edit > Version: New version > Deploy**. Simpan deployment yang sama supaya URL tidak berubah. Receiver versi 2 mendukung tes koneksi berkunci tanpa menambahkan klik contoh.
-8. Membuka URL `/exec` menampilkan JSON dengan `ok: true` dan `version: 2`. Ini hanya tes alamat aktif. Tes izin spreadsheet dan kunci dilakukan dari plugin.
+7. Jika sudah pernah deploy: **Deploy > Manage deployments > Edit > Version: New version > Deploy**. Simpan deployment yang sama supaya URL tidak berubah. Receiver versi 3 tetap mendukung tes koneksi berkunci tanpa menambahkan klik contoh.
+8. Membuka URL `/exec` menampilkan JSON dengan `ok: true`, `version: 3`, dan `timezone: Asia/Jakarta`. Ini hanya tes alamat aktif. Tes izin spreadsheet dan kunci dilakukan dari plugin.
+
+### Mengubah receiver lama dari UTC ke Jakarta
+
+Ganti seluruh kode Apps Script dengan `Code.gs` terbaru, simpan, lalu deploy **New version** pada deployment yang sama. Jalankan `setupSheet` dari editor. Header lama dan waktu data lama bertanda UTC dikonversi ke WIB; zona waktu spreadsheet juga diatur ke Asia/Jakarta. Satu batch mengubah kedua waktu dan penanda zona waktu bersamaan. Menjalankan setup lagi tidak menambah tujuh jam untuk kedua kalinya. Data baru otomatis memakai WIB. Plugin 2.6.14 tetap dapat dipakai tanpa perubahan URL, kunci, atau instalasi ulang.
 
 ## Tiap website WordPress
 

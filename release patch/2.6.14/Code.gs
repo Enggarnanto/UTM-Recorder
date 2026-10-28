@@ -6,15 +6,56 @@ const UTR_COLUMNS = [
   'utm_term', 'utm_content', 'utm_match_type', 'message_source',
   'message_source_recorded', 'received_at_utc'
 ];
-// Display labels follow the click database fields; payload keys stay unchanged.
+const UTR_TIMEZONE = 'Asia/Jakarta';
+// Payload keys stay unchanged; received_at_utc is a legacy internal key.
+// Both time columns in the sheet are displayed in WIB (UTC+7).
 const UTR_HEADERS = [
   'ID Unik Sinkronisasi', 'ID Website', 'URL Website', 'ID Klik',
-  'Waktu Klik (UTC)', 'Zona Waktu', 'ID Browser', 'ID Sesi',
+  'Waktu Klik (WIB)', 'Zona Waktu', 'ID Browser', 'ID Sesi',
   'ID Akun WA', 'Nama Akun WA', 'Nomor WA Tujuan', 'Jenis Link WA',
   'Halaman Klik', 'UTM Source', 'UTM Medium', 'UTM Campaign',
   'UTM Term', 'UTM Content', 'UTM Match Type', 'Sumber dalam Pesan WA',
-  'Status Sumber Terekam (1/0)', 'Waktu Diterima Sheets (UTC)'
+  'Status Sumber Terekam (1/0)', 'Waktu Diterima Sheets (WIB)'
 ];
+
+function utrJakartaTime(value) {
+  let input = value;
+  if (typeof input === 'string' && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(input)) {
+    input = input.replace(' ', 'T') + 'Z';
+  }
+  const date = new Date(input);
+  if (isNaN(date.getTime())) throw new Error('Invalid UTC timestamp.');
+  return Utilities.formatDate(date, UTR_TIMEZONE, 'yyyy-MM-dd HH:mm:ss');
+}
+
+function utrTextCell(value) {
+  const text = String(value == null ? '' : value);
+  return /^[=+\-@\s]/.test(text) ? "'" + text : text;
+}
+
+// Update retained UTC rows in batches. The timezone marker and both converted
+// timestamps are written together so another run does not add seven hours twice.
+function utrMigrateUtcRows(sheet) {
+  const last = sheet.getLastRow();
+  for (let start = 2; start <= last; start += 500) {
+    const range = sheet.getRange(start, 1, Math.min(500, last - start + 1), UTR_COLUMNS.length);
+    const values = range.getValues();
+    let changed = false;
+    values.forEach(function(row) {
+      if (!row[0] || row[5] === UTR_TIMEZONE) return;
+      if (row[5] !== 'UTC') throw new Error('Unknown row timezone; migration stopped.');
+      row[4] = utrJakartaTime(row[4]);
+      if (row[21]) row[21] = utrJakartaTime(row[21]);
+      row[5] = UTR_TIMEZONE;
+      changed = true;
+    });
+    if (changed) {
+      range.setNumberFormat('@');
+      range.setValues(values.map(function(row) { return row.map(utrTextCell); }));
+      SpreadsheetApp.flush();
+    }
+  }
+}
 
 function utrFormatHeader(sheet) {
   sheet.getRange(1, 1, 1, UTR_HEADERS.length).setValues([UTR_HEADERS])
@@ -37,8 +78,9 @@ function utrSheet() {
     utrFormatHeader(sheet);
   }
   const headers = sheet.getRange(1, 1, 1, UTR_COLUMNS.length).getValues()[0];
-  if (headers.join('|') === UTR_COLUMNS.join('|')) {
-    // Upgrade the original headers in place; existing click rows are preserved.
+  const oldHeaders = UTR_HEADERS.map(function(label) { return label.replace('(WIB)', '(UTC)'); });
+  if (headers.join('|') === UTR_COLUMNS.join('|') || headers.join('|') === oldHeaders.join('|')) {
+    utrMigrateUtcRows(sheet);
     utrFormatHeader(sheet);
   } else if (headers.join('|') !== UTR_HEADERS.join('|')) {
     throw new Error('Column headers do not match.');
@@ -50,12 +92,16 @@ function utrSheet() {
 function setupSheet() {
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
-  try { utrSheet(); SpreadsheetApp.flush(); }
+  try {
+    const sheet = utrSheet();
+    sheet.getParent().setSpreadsheetTimeZone(UTR_TIMEZONE);
+    SpreadsheetApp.flush();
+  }
   finally { lock.releaseLock(); }
 }
 
 function doGet() {
-  return utrJson({ok: true, service: 'UTM Recorder Sheets receiver', version: 2});
+  return utrJson({ok: true, service: 'UTM Recorder Sheets receiver', version: 3, timezone: UTR_TIMEZONE});
 }
 
 function doPost(e) {
@@ -91,25 +137,24 @@ function doPost(e) {
     if (!locked) return utrJson({ok: false, error: 'Busy. Retry later.'});
     const sheet = utrSheet();
     if (connectionTest) {
-      return utrJson({ok: true, site_id: siteId, service: 'UTM Recorder Sheets receiver', version: 2});
+      return utrJson({ok: true, site_id: siteId, service: 'UTM Recorder Sheets receiver', version: 3, timezone: UTR_TIMEZONE});
     }
     const count = sheet.getLastRow() - 1;
     const seen = new Set(count ? sheet.getRange(2, 1, count, 1).getValues().map(function(row) { return String(row[0]); }) : []);
     const rows = [];
     const accepted = [];
-    const received = new Date().toISOString();
+    const received = utrJakartaTime(new Date());
     body.events.forEach(function(event) {
       const key = siteId + ':' + String(event.id);
       accepted.push(String(event.id));
       if (seen.has(key)) return;
       const record = Object.assign({}, event, {
         event_key: key, site_id: siteId, site_url: body.site_url,
-        timezone: 'UTC', received_at_utc: received
+        occurred_at: utrJakartaTime(event.occurred_at),
+        timezone: UTR_TIMEZONE, received_at_utc: received
       });
       rows.push(UTR_COLUMNS.map(function(column) {
-        const value = String(record[column] == null ? '' : record[column]);
-        // Preserve text and prevent spreadsheet formula execution.
-        return /^[=+\-@\s]/.test(value) ? "'" + value : value;
+        return utrTextCell(record[column]);
       }));
       seen.add(key);
     });
