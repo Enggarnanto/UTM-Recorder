@@ -1,0 +1,49 @@
+name: Publish plugin release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Verify release tag and version
+        run: |
+          python3 - <<'PY'
+          import os, re, pathlib
+          main = pathlib.Path('utm-traffic-recorder/utm-traffic-recorder.php').read_text()
+          version = re.search(r'^\s*\* Version: ([0-9.]+)\s*$', main, re.M).group(1)
+          assert os.environ['GITHUB_REF_NAME'] == 'v' + version, 'Tag and plugin version must match'
+          PY
+      - name: Validate PHP and integration contracts
+        run: |
+          find utm-traffic-recorder integrations/webhook -name '*.php' -print0 | xargs -0 -n1 php -l
+          php tests/php-admin-smoke.php
+          php tests/php-sheets-smoke.php
+          php tests/php-webhook-smoke.php
+          php tests/php-receiver-storage-smoke.php
+          php tests/php-updater-smoke.php
+          php tests/php-activity-smoke.php
+          node tests/sheets-receiver-smoke.cjs
+          python3 -m unittest discover -s tests -p 'test_*.py'
+      - name: Build portable packages
+        run: python3 tools/build-release.py
+      - name: Publish release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          gh release create "$GITHUB_REF_NAME" \
+            dist/utm-traffic-recorder.zip \
+            "dist/$version/utm-webhook-receiver.zip" \
+            "dist/$version/Code.gs" \
+            "dist/$version/SETUP.md" \
+            --verify-tag --title "UTM Traffic Recorder $version" --notes-file docs/RELEASE-NOTES.md

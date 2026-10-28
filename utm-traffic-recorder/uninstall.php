@@ -5,12 +5,20 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 }
 
 global $wpdb;
+$activity_table = $wpdb->prefix . 'utm_activity_log';
+$wpdb->query( "DROP TABLE IF EXISTS {$activity_table}" );
 $table = $wpdb->prefix . 'utm_traffic_recorder';
 $wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 $click_table = $wpdb->prefix . 'utm_traffic_wa_clicks';
 $wpdb->query( "DROP TABLE IF EXISTS {$click_table}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 wp_clear_scheduled_hook( 'utr_daily_cleanup' );
 wp_clear_scheduled_hook( 'utr_sheets_sync' );
+wp_clear_scheduled_hook( 'utr_webhook_sync' );
+delete_option( 'utr_webhook_config' );
+delete_option( 'utr_webhook_cursor' );
+delete_option( 'utr_webhook_state' );
+delete_option( 'utr_webhook_lock' );
+delete_site_transient( 'utr_github_release' );
 delete_option( 'utr_sheets_config' );
 delete_option( 'utr_sheets_cursor' );
 delete_option( 'utr_sheets_state' );

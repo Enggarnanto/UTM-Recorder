@@ -3,7 +3,7 @@ Contributors: galih
 Tags: utm, analytics, traffic, campaign, tracking
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 2.6.14
+Stable tag: 2.6.16
 License: GPLv2 or later
 
 Records pageviews, UTM parameters, and WhatsApp CTA clicks in your WordPress database.
@@ -13,6 +13,15 @@ Panduan penggunaan lengkap berbahasa Indonesia tersedia di DOKUMENTASI.md dalam 
 1. Upload the `utm-traffic-recorder` folder or its ZIP through Plugins > Add New > Upload Plugin.
 2. Activate the plugin.
 3. Open Traffic Recorder in the WordPress admin menu.
+
+== Activity log and package identity ==
+Version 2.6.16 adds Traffic Recorder > Log aktivitas for administrators. It records plugin activation/deactivation/version changes, setting changes, tracking successes/rejections, Google Sheets and webhook results, GitHub checks, and log exports. Filter by category/level or export up to 10,000 rows as CSV. Logs begin when this version is installed; earlier activity is not reconstructed. Daily WP-Cron cleanup removes logs older than 30 days and trims to 50,000 rows. Credentials are redacted; request bodies, phone numbers, browser IDs, and session IDs are not copied to the audit log. Local click history remains separate with its existing retention. Logging failures do not block recording or synchronization.
+Every release keeps the same folder and plugin basename: utm-traffic-recorder/utm-traffic-recorder.php. A version suffix belongs only to the ZIP filename. The build validates this identity and simulates replacing an old installation. WordPress/hosting still controls whether its upload screen offers an overwrite button; the package cannot force that screen. An installation previously renamed to a different folder needs its path checked separately.
+
+== Updates and generic Webhook/API ==
+Version 2.6.15 adds native WordPress update discovery from public GitHub Releases at Enggarnanto/UTM-Recorder. Install 2.6.15 manually once on each website. Later higher versions with an uploaded installable ZIP appear in Plugins > Update now. Settings > Pembaruan plugin includes Periksa pembaruan. Checks contact GitHub's public API, cache results, and use no private GitHub token. A commit or source-code ZIP alone does not publish an update. Auto-update is not enabled without the administrator's choice.
+Settings > Integrasi Webhook/API can send every retained WhatsApp click to any backend implementing the documented JSON/Bearer protocol. Configure its final HTTPS endpoint, unique site ID, and server-side key, save, test, then enable. Google Sheets continues independently. Both queues send up to 100 records per five-minute WP-Cron run; retries and separate acknowledgements prevent skipped or duplicated records. The backend developer package includes a language-independent contract and reference PHP/CodeIgniter 3/4 receivers; deployment to an external system is required separately. No organization-specific endpoint is hardcoded.
+Webhook data is sent only after opt-in; test requests send the website identity and credentials but no sample clicks. Existing 90-day local retention still applies. Time is sent in UTC; backend dashboards can display WIB. The included Apps Script receiver version 3 displays both click and receipt times in WIB and can migrate retained UTC rows via setupSheet.
 
 == Google Sheets integration ==
 Version 2.6.14 reads the ContentService redirect using a fresh GET without the original JSON body. This fixes an HTTP 400 response that could leave clicks in Sheets while WordPress still reported a failure and retained its queue. Response fetch retries never resend the POST; cursor acknowledgement and deduplication are unchanged. Existing receiver version 2 needs no changes.

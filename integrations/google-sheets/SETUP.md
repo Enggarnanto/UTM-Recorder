@@ -1,4 +1,4 @@
-# Sinkronisasi klik WA ke Google Sheets — plugin 2.6.14
+# Sinkronisasi klik WA ke Google Sheets — plugin 2.6.16
 
 Satu baris adalah satu klik WhatsApp yang berhasil dicatat plugin. Semua field tabel klik dikirim, ditambah identitas website dan waktu penerimaan. Pageview tidak dikirim. Nomor WA adalah nomor tujuan/admin, bukan nomor pengunjung. Receiver versi 3 menampilkan waktu klik dan penerimaan dalam WIB (Asia/Jakarta, UTC+7), berformat `yyyy-MM-dd HH:mm:ss`. Data asal WordPress tetap UTC; ID browser dan sesi dikirim lengkap.
 
@@ -19,7 +19,7 @@ Ganti seluruh kode Apps Script dengan `Code.gs` terbaru, simpan, lalu deploy **N
 
 ## Tiap website WordPress
 
-1. Upload `utm-traffic-recorder-2.6.14.zip` melalui **Plugins > Add New > Upload Plugin**, lalu ganti instalasi lama. Pengaturan dan riwayat lama tetap dipakai. Paket 2.6.13 memperbaiki pemisah path ZIP; 2.6.14 memperbaiki pembacaan konfirmasi Google dengan GET tanpa meneruskan body POST pada redirect ContentService. Receiver versi 2 tetap dapat dipakai tanpa redeploy.
+1. Upload `dist/2.6.16/utm-traffic-recorder-2.6.16.zip` melalui **Plugins > Add New > Upload Plugin**, lalu ganti instalasi lama. Folder internal tetap `utm-traffic-recorder`. Pengaturan dan riwayat lama tetap dipakai. Receiver versi 2/3 tetap kompatibel. Versi 2.6.16 menambahkan Log aktivitas di menu plugin.
 2. Buka **Traffic Recorder > Settings > Integrasi Google Sheets**.
 3. Isi URL Apps Script `/exec`, ID website (contoh `web_a`), dan kunci yang sama dengan Value `SITE_KEY_web_a`. Website lain memakai ID dan kunci sendiri; URL penerimanya boleh sama.
 4. Klik **Simpan integrasi**, lalu **Tes koneksi**. Tes memeriksa kunci serta akses spreadsheet; tidak menambah data klik. Tidak perlu mengaktifkan sinkronisasi untuk tes.

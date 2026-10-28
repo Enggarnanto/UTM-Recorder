@@ -2,10 +2,11 @@
 /**
  * Plugin Name: UTM Traffic Recorder
  * Description: Records pageviews and UTM parameters, with a private WordPress admin report and CSV export.
- * Version: 2.6.14
+ * Version: 2.6.16
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Plugin URI: https://www.mtalkblog.com
+ * Update URI: https://github.com/Enggarnanto/UTM-Recorder
  * Author: Galih Enggarnanto
  * Author URI: https://www.mtalkblog.com
  * License: GPL-2.0-or-later
@@ -16,12 +17,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'UTR_VERSION', '2.6.14' );
+define( 'UTR_VERSION', '2.6.16' );
 define( 'UTR_FILE', __FILE__ );
+require_once __DIR__ . '/includes/activity-log.php';
 require_once __DIR__ . '/includes/wa-core.php';
 require_once __DIR__ . '/includes/wa-admin.php';
 require_once __DIR__ . '/includes/settings.php';
 require_once __DIR__ . '/includes/google-sheets.php';
+require_once __DIR__ . '/includes/webhook-integration.php';
+require_once __DIR__ . '/includes/github-updater.php';
 
 function utr_table_name() {
 	global $wpdb;
@@ -57,7 +61,9 @@ function utr_activate() {
 	) {$charset};";
 	dbDelta( $sql );
 	utr_install_wa_table();
+	utr_install_activity_table();
 	update_option( 'utr_schema_version', UTR_VERSION, false );
+	utr_activity_log( 'plugin.activated', 'info', array( 'version' => UTR_VERSION ) );
 	if ( ! wp_next_scheduled( 'utr_daily_cleanup' ) ) {
 		wp_schedule_event( time() + DAY_IN_SECONDS, 'daily', 'utr_daily_cleanup' );
 	}
@@ -80,8 +86,10 @@ function utr_upgrade_schema() {
 add_action( 'init', 'utr_upgrade_schema', 2 );
 
 function utr_deactivate() {
+	utr_activity_log( 'plugin.deactivated', 'info', array( 'version' => UTR_VERSION ) );
 	wp_clear_scheduled_hook( 'utr_daily_cleanup' );
 	wp_clear_scheduled_hook( 'utr_sheets_sync' );
+	wp_clear_scheduled_hook( 'utr_webhook_sync' );
 }
 register_deactivation_hook( __FILE__, 'utr_deactivate' );
 
@@ -232,6 +240,7 @@ function utr_admin_menu() {
 	add_submenu_page( 'utm-traffic-recorder', 'UTM Manager', 'UTM Manager', 'manage_options', 'utr-utm-manager', 'utr_render_utm_manager' );
 	add_submenu_page( 'utm-traffic-recorder', 'CTA WA', 'CTA WA', 'manage_options', 'utr-whatsapp', 'utr_render_cta_manager' );
 	add_submenu_page( 'utm-traffic-recorder', 'Settings', 'Settings', 'manage_options', 'utr-settings', 'utr_render_feature_settings' );
+	add_submenu_page( 'utm-traffic-recorder', 'Log aktivitas', 'Log aktivitas', 'manage_options', 'utr-activity-log', 'utr_render_activity_log' );
 }
 add_action( 'admin_menu', 'utr_admin_menu' );
 
@@ -312,7 +321,7 @@ function utr_refresh_version_cache() {
 add_action( 'admin_init', 'utr_refresh_version_cache' );
 
 function utr_enqueue_admin_style( $hook ) {
-	if ( false !== strpos( $hook, 'utm-traffic-recorder' ) || false !== strpos( $hook, 'utr-utm-manager' ) || false !== strpos( $hook, 'utr-whatsapp' ) || false !== strpos( $hook, 'utr-wa-dashboard' ) || false !== strpos( $hook, 'utr-settings' ) ) {
+	if ( false !== strpos( $hook, 'utm-traffic-recorder' ) || false !== strpos( $hook, 'utr-utm-manager' ) || false !== strpos( $hook, 'utr-whatsapp' ) || false !== strpos( $hook, 'utr-wa-dashboard' ) || false !== strpos( $hook, 'utr-settings' ) || false !== strpos( $hook, 'utr-activity-log' ) ) {
 		wp_enqueue_style( 'utr-brand-fonts', 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap', array(), null );
 		wp_enqueue_style( 'utr-admin', plugins_url( 'assets/admin.css', __FILE__ ), array( 'utr-brand-fonts' ), UTR_VERSION );
 	}

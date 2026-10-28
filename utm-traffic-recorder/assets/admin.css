@@ -225,6 +225,7 @@
 .utr-sheets-status { margin-top: 22px; padding: 10px 16px; background: #f5f8fc; border-radius: 8px; overflow-wrap: anywhere; }
 .utr-sheets-tools { display: flex; flex-wrap: wrap; gap: 10px; }
 .utr-sheets-settings .utr-sheets-tools .button { margin-top: 12px; }
+.utr-activity-context { display: block; max-width: 440px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .utr-settings-panel,
 .utr-preview-panel { padding: 22px; }
 .utr-settings-panel h2,

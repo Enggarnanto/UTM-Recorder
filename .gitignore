@@ -1,0 +1,34 @@
+# Generated distributions and legacy release archives (kept locally).
+/dist/
+/release patch/
+*.zip
+
+# Runtime logs, caches, temporary previews.
+*.log
+/logs/
+/tmp/
+/temp/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+*.tmp
+*.bak
+
+# Local dependencies, editors and operating-system metadata.
+node_modules/
+vendor/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Local credentials. Templates remain versionable.
+.env
+.env.*
+!.env.example
+!.env.sample
+credentials*.json
+service-account*.json
+*.pem
+*.key

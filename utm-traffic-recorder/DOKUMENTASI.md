@@ -1,6 +1,6 @@
 # Panduan UTM Traffic Recorder
 
-**Versi plugin:** 2.6.14
+**Versi plugin:** 2.6.16
 
 Tampilan dashboard dan CTA mengambang memakai Deep Navy, Electric Blue, dan aksen Electric Lime. Heading menggunakan Sora dan teks menggunakan Plus Jakarta Sans, dengan font sistem sebagai cadangan bila Google Fonts tidak tersedia. Warna akun WhatsApp yang sudah diatur sendiri tetap dipertahankan; warna bawaan akun baru adalah Electric Blue.
 
@@ -25,11 +25,27 @@ Plugin ini mencatat kunjungan website, parameter UTM, dan klik WhatsApp. Laporan
 
 Pengujian sebaiknya dilakukan di jendela privat. Kunjungan dan klik dari pengguna yang sedang login ke WordPress tidak masuk laporan.
 
+## Log aktivitas dan identitas paket
+
+Menu **Traffic Recorder → Log aktivitas** mencatat aktivasi/nonaktivasi/perubahan versi, perubahan pengaturan, kunjungan dan klik WA yang berhasil dicatat, penolakan endpoint pelacakan, hasil proses Google Sheets/Webhook, pemeriksaan update GitHub, serta ekspor log. Halaman ini khusus administrator, dilengkapi filter kategori/level, pagination 50 baris, dan ekspor CSV maksimal 10.000 catatan. Waktu mengikuti zona waktu WordPress.
+
+Log mulai dicatat sejak pemasangan 2.6.16; aktivitas sebelum itu tidak direkonstruksi. Kunci koneksi disamarkan, sedangkan isi payload, nomor WA, ID browser/sesi, dan header otorisasi tidak disalin ke log. Pembersihan harian WP-Cron menghapus catatan berumur lebih dari 30 hari dan memangkas menjadi 50.000 catatan. Log tersimpan di database lokal, terpisah dari laporan trafik/klik. Kegagalan penulisan log tidak menghentikan operasi utama. Uninstall melalui tombol Delete menghapus tabel log bersama data plugin lainnya.
+
+Identitas instalasi tetap **`utm-traffic-recorder/utm-traffic-recorder.php`** di semua versi. Nama ZIP boleh memuat nomor versi, tetapi folder internalnya tidak. Build menolak folder bertingkat, file private/runtime, dan beberapa entry point plugin. Pengujian lokal menimpa simulasi folder instalasi 2.6.11 dan memeriksa bahwa tidak muncul folder plugin kedua. Tampilan tombol Replace tetap dikendalikan WordPress/hosting; instalasi lama yang foldernya sudah diubah nama perlu diperiksa terpisah.
+
+## Pembaruan dan Webhook/API
+
+Mulai 2.6.15, menu **Settings → Pembaruan plugin** menyediakan **Periksa pembaruan** dari GitHub Enggarnanto/UTM-Recorder. Pasang versi ini manual sekali; rilis berikutnya yang lebih tinggi dengan ZIP instalasi dapat diperbarui lewat tombol WordPress di halaman Plugins. Commit GitHub saja belum menyediakan update; rilis harus dipublikasikan beserta asset ZIP. Auto-update tidak diaktifkan otomatis.
+
+Di **Settings → Integrasi Webhook/API**, isi URL API HTTPS final, ID website unik, dan kunci API yang didaftarkan pada backend. Simpan, tes koneksi, lalu aktifkan. Fitur ini netral dan dapat dipakai backend apa pun yang menerapkan kontrak JSON/Bearer; tersedia paket contoh receiver PHP, CodeIgniter 3, dan CodeIgniter 4 beserta skema MySQL/MariaDB untuk tim pengembang. Backend belum otomatis terpasang hanya dengan mengaktifkan plugin WordPress.
+
+Webhook mengirim detail klik WA dalam batch maksimal 100 tiap jadwal 5 menit WP-Cron, dengan cursor, lock, kredensial, dan status terpisah dari Google Sheets. Keduanya dapat berjalan bersamaan. Posisi dikonfirmasi hanya setelah seluruh ID batch diterima oleh backend; pengiriman gagal dicoba kembali dan receiver mencegah duplikat berdasarkan ID website dan ID klik. Retensi lokal tetap 90 hari. Waktu asal dikirim dalam UTC untuk ditampilkan WIB oleh backend.
+
 ## Integrasi Google Sheets
 
 Di **Traffic Recorder → Settings → Integrasi Google Sheets**, isi URL Web app Apps Script yang berakhir `/exec`, ID website unik, dan kunci sesuai Value Script Property `SITE_KEY_<ID website>`. Simpan integrasi, lalu klik **Tes koneksi**. Receiver versi terbaru mendukung tes berkunci tanpa menambah klik contoh; setelah memperbarui kode receiver, deploy **New version** pada deployment yang sama.
 
-Aktifkan sinkronisasi lalu simpan. Seluruh field klik WA yang masih tersimpan dikirim dari server dalam batch maksimal 100 klik tiap 5 menit melalui WP-Cron. Klik **Sinkronkan sekarang** untuk menjalankan satu batch segera; sisanya dilanjutkan otomatis. Pageview tidak dikirim. Satu klik menjadi satu baris, bersama identitas website, ID browser/sesi lengkap, akun dan nomor WA tujuan, jenis link, halaman, seluruh UTM yang dicatat, serta sumber pesan. Waktu klik di Sheets menggunakan UTC.
+Aktifkan sinkronisasi lalu simpan. Seluruh field klik WA yang masih tersimpan dikirim dari server dalam batch maksimal 100 klik tiap 5 menit melalui WP-Cron. Klik **Sinkronkan sekarang** untuk menjalankan satu batch segera; sisanya dilanjutkan otomatis. Pageview tidak dikirim. Satu klik menjadi satu baris, bersama identitas website, ID browser/sesi lengkap, akun dan nomor WA tujuan, jenis link, halaman, seluruh UTM yang dicatat, serta sumber pesan. Data asal dikirim UTC; receiver versi 3 menampilkan waktu klik dan penerimaan di Sheets sebagai WIB (Asia/Jakarta).
 
 Receiver mencegah duplikat berdasarkan ID website dan ID klik; jangan gunakan ID website sama pada dua instalasi. Jika database direset dan ID klik dimulai lagi, pakai ID website baru. Pengiriman gagal tidak memajukan posisi sinkronisasi dan akan dicoba ulang. **Sinkronkan ulang riwayat** mengirim kembali data yang masih ada tanpa menghapus riwayat. Penggantian URL penerima atau ID website memulai ekspor dari awal; perubahan kunci saja tidak.
 

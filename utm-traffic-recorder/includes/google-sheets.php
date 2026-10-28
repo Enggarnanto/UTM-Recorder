@@ -36,19 +36,19 @@ function utr_sheets_schedule() {
 add_action( 'init', 'utr_sheets_schedule', 10 );
 
 /** Atomic expiring lock shared by exports and settings changes. */
-function utr_sheets_unlock( $value ) {
+function utr_sheets_unlock( $value, $option = 'utr_sheets_lock' ) {
 	global $wpdb;
-	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name = %s AND option_value = %s", 'utr_sheets_lock', $value ) );
-	wp_cache_delete( 'utr_sheets_lock', 'options' );
+	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name = %s AND option_value = %s", $option, $value ) );
+	wp_cache_delete( $option, 'options' );
 }
 
-function utr_sheets_lock() {
-	$old = get_option( 'utr_sheets_lock', '' );
+function utr_sheets_lock( $option = 'utr_sheets_lock' ) {
+	$old = get_option( $option, '' );
 	if ( $old && (int) $old < time() ) {
-		utr_sheets_unlock( $old );
+		utr_sheets_unlock( $old, $option );
 	}
 	$value = ( time() + 180 ) . ':' . wp_generate_uuid4();
-	return add_option( 'utr_sheets_lock', $value, '', false ) ? $value : false;
+	return add_option( $option, $value, '', false ) ? $value : false;
 }
 
 /** Read Google's ContentService redirect without forwarding the POST body. */
@@ -116,6 +116,7 @@ function utr_sheets_request( $config, $extra ) {
 }
 
 function utr_sheets_set_status( $message, $success ) {
+	if ( function_exists( 'utr_activity_log' ) ) { utr_activity_log( 'sheets.operation', $success ? 'info' : 'error', array( 'detail' => $message ) ); }
 	$state = get_option( 'utr_sheets_state', array() );
 	$state = is_array( $state ) ? $state : array();
 	$state['message'] = $message;
