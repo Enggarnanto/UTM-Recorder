@@ -102,6 +102,7 @@ function utr_render_feature_settings() {
 			</div>
 			<div class="utr-settings-actions"><button class="button button-primary" type="submit">Simpan pengaturan</button></div>
 		</form>
+		<?php utr_render_sheets_settings(); ?>
 		<?php utr_render_brand_footer(); ?>
 	</div>
 	<?php

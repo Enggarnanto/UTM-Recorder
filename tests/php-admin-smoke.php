@@ -7,6 +7,7 @@ $purges = 0;
 $nonces = array();
 class TestRedirect extends RuntimeException {}
 function add_action( $name, $callback ) { global $actions; $actions[$name][] = $callback; }
+function add_filter() {}
 function do_action( $name, ...$args ) { global $actions, $purges; if ( 'litespeed_purge_all' === $name ) { ++$purges; } foreach ( $actions[$name] ?? array() as $callback ) { $callback(...$args); } }
 function add_shortcode() {}
 function register_activation_hook() {}

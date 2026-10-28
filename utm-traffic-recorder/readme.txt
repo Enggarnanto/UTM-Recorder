@@ -3,7 +3,7 @@ Contributors: galih
 Tags: utm, analytics, traffic, campaign, tracking
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 2.6.11
+Stable tag: 2.6.14
 License: GPLv2 or later
 
 Records pageviews, UTM parameters, and WhatsApp CTA clicks in your WordPress database.
@@ -14,13 +14,20 @@ Panduan penggunaan lengkap berbahasa Indonesia tersedia di DOKUMENTASI.md dalam 
 2. Activate the plugin.
 3. Open Traffic Recorder in the WordPress admin menu.
 
+== Google Sheets integration ==
+Version 2.6.14 reads the ContentService redirect using a fresh GET without the original JSON body. This fixes an HTTP 400 response that could leave clicks in Sheets while WordPress still reported a failure and retained its queue. Response fetch retries never resend the POST; cursor acknowledgement and deduplication are unchanged. Existing receiver version 2 needs no changes.
+Optional export is available in Traffic Recorder > Settings > Integrasi Google Sheets.
+Configure an Apps Script Web app URL ending in /exec, a unique site ID, and its server-side secret (32–512 characters, no whitespace). The receiver code is supplied with this release. Run setupSheet, deploy as Me with access Anyone, and update the deployment to a new version after changing the script.
+Save the integration, then use Tes koneksi. Enable sync to export all retained WhatsApp click records in ordered batches of up to 100 every five minutes via WP-Cron. Ordinary pageviews are not exported. Every recorded click field is sent, together with the website identity; times use UTC. No requests to Google are made by the visitor's browser.
+Failed or unacknowledged batches keep their cursor and are retried. The receiver deduplicates by site ID plus click ID. Keep site IDs unique and stable; use a new ID if a site's click database is recreated and its numeric IDs restart. Changing the endpoint or site ID restarts history export. Sinkronkan ulang riwayat replays retained records, for example after deleting rows in Sheets.
+WP-Cron depends on site activity. Use hosting cron for consistent scheduling on quiet sites. Existing 90-day WordPress retention still applies, including to records not yet exported. Google Apps Script/Sheets quotas apply. Google receives the exported data only after this optional feature is configured and enabled (or a connection test is requested).
+
 == Admin menus ==
 * Dashboard Trafik & UTM: full-width responsive traffic dashboard with distinct browser ID and session totals, WhatsApp click totals, top UTM sources, and recent click details.
 * Dashboard Chat WA: WhatsApp click totals, visitor sessions, top five accounts or numbers ranked by unique clicking sessions, session IDs, and UTM details per click.
 * UTM Manager: browser IDs with their session and pageview counts (five rows by default, configurable from 1 to 500), top source, medium, campaign, content, and term rankings by distinct sessions, full pageview details including available referrer URLs and match type, browser ID filter, CSV export, and an optional Clean URL toggle.
 * CTA WA: manage multiple WhatsApp accounts, avatars, numbers, titles, active days, page availability, custom colors, and shortcodes. Drag and drop account rows or use the up/down controls to arrange their priority. Toggle each account's appearance in the floating chat list directly in the table; the shortcode remains available. One floating WhatsApp launcher opens the account list with a configurable greeting, left/right position, separate background/text/accent colors, and button size from 80% to 140% with a live preview. This menu controls floating display, existing-link enhancement, WhatsApp UTM source mode and format, and an optional no-UTM fallback with its own label and current-page or custom URL.
 * Post and Page editor sidebar > Shortcode WA: copy an account shortcode for use in editor content or SEO Writer.
-* Tabel Price: coming soon.
 * Settings: choose which UTM columns are recorded in visit and click reports, turn click tracking for existing api.whatsapp.com/send and wa.me links on or off, and turn Clean URL on or off. Both `utm_matchtype` and `utm_match_type` are accepted into the `utm_match_type` field.
 
 Click a data table's column heading to sort the visible rows. On narrow screens, use the sort selector above the table. Sorting paginated reports applies to the current page only. Account table sorting is temporary; priority dragging resumes when the original order is restored.

@@ -10,6 +10,11 @@ $wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.Di
 $click_table = $wpdb->prefix . 'utm_traffic_wa_clicks';
 $wpdb->query( "DROP TABLE IF EXISTS {$click_table}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 wp_clear_scheduled_hook( 'utr_daily_cleanup' );
+wp_clear_scheduled_hook( 'utr_sheets_sync' );
+delete_option( 'utr_sheets_config' );
+delete_option( 'utr_sheets_cursor' );
+delete_option( 'utr_sheets_state' );
+delete_option( 'utr_sheets_lock' );
 delete_option( 'utr_whatsapp_settings' );
 delete_option( 'utr_loaded_version' );
 delete_option( 'utr_wa_accounts' );

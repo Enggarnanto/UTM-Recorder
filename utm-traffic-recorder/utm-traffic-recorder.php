@@ -2,7 +2,7 @@
 /**
  * Plugin Name: UTM Traffic Recorder
  * Description: Records pageviews and UTM parameters, with a private WordPress admin report and CSV export.
- * Version: 2.6.11
+ * Version: 2.6.14
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Plugin URI: https://www.mtalkblog.com
@@ -16,11 +16,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'UTR_VERSION', '2.6.11' );
+define( 'UTR_VERSION', '2.6.14' );
 define( 'UTR_FILE', __FILE__ );
 require_once __DIR__ . '/includes/wa-core.php';
 require_once __DIR__ . '/includes/wa-admin.php';
 require_once __DIR__ . '/includes/settings.php';
+require_once __DIR__ . '/includes/google-sheets.php';
 
 function utr_table_name() {
 	global $wpdb;
@@ -80,6 +81,7 @@ add_action( 'init', 'utr_upgrade_schema', 2 );
 
 function utr_deactivate() {
 	wp_clear_scheduled_hook( 'utr_daily_cleanup' );
+	wp_clear_scheduled_hook( 'utr_sheets_sync' );
 }
 register_deactivation_hook( __FILE__, 'utr_deactivate' );
 
@@ -229,7 +231,6 @@ function utr_admin_menu() {
 	add_submenu_page( 'utm-traffic-recorder', 'Dashboard Chat WA', 'Dashboard Chat WA', 'manage_options', 'utr-wa-dashboard', 'utr_render_wa_dashboard' );
 	add_submenu_page( 'utm-traffic-recorder', 'UTM Manager', 'UTM Manager', 'manage_options', 'utr-utm-manager', 'utr_render_utm_manager' );
 	add_submenu_page( 'utm-traffic-recorder', 'CTA WA', 'CTA WA', 'manage_options', 'utr-whatsapp', 'utr_render_cta_manager' );
-	add_submenu_page( 'utm-traffic-recorder', 'Tabel Price', 'Tabel Price', 'manage_options', 'utr-price-table', 'utr_render_price_table' );
 	add_submenu_page( 'utm-traffic-recorder', 'Settings', 'Settings', 'manage_options', 'utr-settings', 'utr_render_feature_settings' );
 }
 add_action( 'admin_menu', 'utr_admin_menu' );
@@ -281,18 +282,6 @@ function utr_render_shortcode_metabox() {
 	<?php
 }
 
-function utr_render_price_table() {
-	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_die( 'Tidak diizinkan.' );
-	}
-	?>
-	<div class="wrap utr-admin">
-		<header class="utr-header"><div><p class="utr-eyebrow">TRAFFIC RECORDER</p><h1>Tabel Price</h1><?php utr_render_header_version(); ?><p class="utr-subtitle">Soon</p></div></header><hr class="wp-header-end">
-		<section class="utr-panel"><h2>Tabel Price</h2><p>Fitur tabel price segera hadir.</p></section>
-	</div>
-	<?php
-}
-
 function utr_render_brand_footer() {
 	echo '<p class="utr-brand-footer">&copy; ' . esc_html( wp_date( 'Y' ) ) . ' <a href="https://www.mtalkblog.com/p/utm-traffic-recorder-dokumentasi.html" target="_blank" rel="noopener noreferrer">UTM Trafik Manager</a></p>';
 }
@@ -323,7 +312,7 @@ function utr_refresh_version_cache() {
 add_action( 'admin_init', 'utr_refresh_version_cache' );
 
 function utr_enqueue_admin_style( $hook ) {
-	if ( false !== strpos( $hook, 'utm-traffic-recorder' ) || false !== strpos( $hook, 'utr-utm-manager' ) || false !== strpos( $hook, 'utr-whatsapp' ) || false !== strpos( $hook, 'utr-wa-dashboard' ) || false !== strpos( $hook, 'utr-settings' ) || false !== strpos( $hook, 'utr-price-table' ) ) {
+	if ( false !== strpos( $hook, 'utm-traffic-recorder' ) || false !== strpos( $hook, 'utr-utm-manager' ) || false !== strpos( $hook, 'utr-whatsapp' ) || false !== strpos( $hook, 'utr-wa-dashboard' ) || false !== strpos( $hook, 'utr-settings' ) ) {
 		wp_enqueue_style( 'utr-brand-fonts', 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap', array(), null );
 		wp_enqueue_style( 'utr-admin', plugins_url( 'assets/admin.css', __FILE__ ), array( 'utr-brand-fonts' ), UTR_VERSION );
 	}

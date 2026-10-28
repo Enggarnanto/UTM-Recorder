@@ -218,6 +218,13 @@
 .utr-cross-setting-note a { font-weight: 700; }
 .utr-settings-actions { margin: 20px 0 28px; }
 .utr-settings-actions .button { min-height: 40px; padding: 0 18px; }
+.utr-sheets-settings input[type="url"],
+.utr-sheets-settings input[type="text"],
+.utr-sheets-settings input[type="password"] { margin: 8px 0; min-height: 38px; max-width: 100%; }
+.utr-sheets-settings small { color: #657186; }
+.utr-sheets-status { margin-top: 22px; padding: 10px 16px; background: #f5f8fc; border-radius: 8px; overflow-wrap: anywhere; }
+.utr-sheets-tools { display: flex; flex-wrap: wrap; gap: 10px; }
+.utr-sheets-settings .utr-sheets-tools .button { margin-top: 12px; }
 .utr-settings-panel,
 .utr-preview-panel { padding: 22px; }
 .utr-settings-panel h2,

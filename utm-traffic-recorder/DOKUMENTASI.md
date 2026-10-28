@@ -1,6 +1,6 @@
 # Panduan UTM Traffic Recorder
 
-**Versi plugin:** 2.6.11
+**Versi plugin:** 2.6.14
 
 Tampilan dashboard dan CTA mengambang memakai Deep Navy, Electric Blue, dan aksen Electric Lime. Heading menggunakan Sora dan teks menggunakan Plus Jakarta Sans, dengan font sistem sebagai cadangan bila Google Fonts tidak tersedia. Warna akun WhatsApp yang sudah diatur sendiri tetap dipertahankan; warna bawaan akun baru adalah Electric Blue.
 
@@ -25,6 +25,18 @@ Plugin ini mencatat kunjungan website, parameter UTM, dan klik WhatsApp. Laporan
 
 Pengujian sebaiknya dilakukan di jendela privat. Kunjungan dan klik dari pengguna yang sedang login ke WordPress tidak masuk laporan.
 
+## Integrasi Google Sheets
+
+Di **Traffic Recorder → Settings → Integrasi Google Sheets**, isi URL Web app Apps Script yang berakhir `/exec`, ID website unik, dan kunci sesuai Value Script Property `SITE_KEY_<ID website>`. Simpan integrasi, lalu klik **Tes koneksi**. Receiver versi terbaru mendukung tes berkunci tanpa menambah klik contoh; setelah memperbarui kode receiver, deploy **New version** pada deployment yang sama.
+
+Aktifkan sinkronisasi lalu simpan. Seluruh field klik WA yang masih tersimpan dikirim dari server dalam batch maksimal 100 klik tiap 5 menit melalui WP-Cron. Klik **Sinkronkan sekarang** untuk menjalankan satu batch segera; sisanya dilanjutkan otomatis. Pageview tidak dikirim. Satu klik menjadi satu baris, bersama identitas website, ID browser/sesi lengkap, akun dan nomor WA tujuan, jenis link, halaman, seluruh UTM yang dicatat, serta sumber pesan. Waktu klik di Sheets menggunakan UTC.
+
+Receiver mencegah duplikat berdasarkan ID website dan ID klik; jangan gunakan ID website sama pada dua instalasi. Jika database direset dan ID klik dimulai lagi, pakai ID website baru. Pengiriman gagal tidak memajukan posisi sinkronisasi dan akan dicoba ulang. **Sinkronkan ulang riwayat** mengirim kembali data yang masih ada tanpa menghapus riwayat. Penggantian URL penerima atau ID website memulai ekspor dari awal; perubahan kunci saja tidak.
+
+Kunci yang sudah tersimpan tidak ditampilkan di form. Biarkan kolom kunci kosong untuk mempertahankannya. Jangan bagikan kunci. Matikan checkbox dan simpan untuk menghentikan pengiriman otomatis. Data klik dikirim ke Google hanya bila integrasi diaktifkan; tombol tes koneksi mengirim identitas website dan kunci untuk memeriksa akses.
+
+Jadwal WP-Cron bergantung pada aktivitas website; gunakan cron hosting untuk jadwal konsisten. Retensi lokal tetap 90 hari, termasuk data yang belum tersinkron. Riwayat yang sudah dihapus tidak dapat dipulihkan melalui fitur ini. Kuota Apps Script/Sheets berlaku; spreadsheet sangat besar memerlukan pengarsipan.
+
 ## Persyaratan
 
 - WordPress 6.0 atau lebih baru dan PHP 7.4 atau lebih baru.
@@ -40,7 +52,6 @@ Pengujian sebaiknya dilakukan di jendela privat. Kunjungan dan klik dari penggun
 | **UTM Manager** | Melihat ID browser dan jumlah sesinya, lima peringkat UTM, detail kunjungan, filter, ekspor CSV, serta toggle Clean URL. |
 | **CTA WA** | Mengelola akun admin, avatar, pesan, jadwal, halaman penayangan, urutan akun, shortcode, tombol mengambang, serta seluruh format sumber pesan WA. |
 | **Sidebar editor Post / Page → Shortcode WA** | Menyalin shortcode akun untuk konten Post, Page, atau SEO Writer. |
-| **Tabel Price** | Segera hadir (Soon). |
 | **Settings** | Memilih kolom UTM yang dicatat dalam laporan kunjungan dan klik WA, pelacakan tautan WA yang sudah ada, dan Clean URL. |
 
 ## Mengatur pencatatan UTM

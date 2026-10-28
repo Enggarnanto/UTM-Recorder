@@ -1,11 +1,12 @@
 # UTM Traffic Recorder
 
-Plugin WordPress untuk mencatat kunjungan, parameter UTM, sesi browser, dan klik CTA WhatsApp. Versi saat ini: **2.6.11**.
+Plugin WordPress untuk mencatat kunjungan, parameter UTM, sesi browser, dan klik CTA WhatsApp. Versi saat ini: **2.6.14**.
 
 ## Isi proyek
 
 - **utm-traffic-recorder/** — kode sumber plugin WordPress.
-- **utm-traffic-recorder.zip** — paket siap unggah ke WordPress (versi 2.6.11).
+- **utm-traffic-recorder.zip** — paket siap unggah ke WordPress (versi 2.6.14).
+- **integrations/google-sheets/** — receiver Apps Script dan panduan sinkronisasi detail klik WhatsApp dari banyak website.
 - **landing-dokumentasi/** — landing page dokumentasi dan potongan HTML untuk Blogger.
 - **tests/fallback-smoke.ps1** — uji pilihan sumber tanpa UTM di browser headless.
 - **tests/smoke.ps1** — uji perilaku JavaScript di browser headless.
