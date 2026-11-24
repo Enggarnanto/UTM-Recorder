@@ -39,12 +39,15 @@ try {
     var win = {utrWhatsappConfig: Object.assign({message: 'Halo', enhanceLinks: true, fallbackEnabled: true, sourceSeparator: '+', accounts: []}, options || {}), location: new URL('https://example.com/kelas/'), utrTracking: {session_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', visitor_id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'}, localStorage: {getItem: function () { return null; }}, navigator: {}};
     if (setup.query) win.location = new URL('https://example.com/kelas/' + setup.query);
     win.localStorage.getItem = function () { return JSON.stringify(setup.localUtm || null); };
+    var payloads = [];
+    win.fetch = function (endpoint, request) { payloads.push(JSON.parse(request.body)); return {catch: function () {}}; };
     whatsapp(win, doc, {getItem: function () { return JSON.stringify(setup.sessionUtm || null); }});
-    if (setup.nextUtm) {
-      setup.localUtm = setup.nextUtm;
+    if (setup.nextUtm || setup.capture) {
+      if (setup.nextUtm) setup.localUtm = setup.nextUtm;
       click({target: {closest: function () { return link; }}});
       click({target: {closest: function () { return link; }}});
     }
+    if (setup.capture) return {text: new URL(link.href).searchParams.get('text'), payloads: payloads};
     return new URL(link.href).searchParams.get('text');
   }
   var expected = ['Halo\n\nSumber: https://example.com/kelas/', 'Halo\n\nSumber: https://example.com/kelas/+aaaaaaaa', 'Halo\n\nSumber: https://example.com/kelas/+AAAAAAAA+BBBBBBBB', 'Halo\n\nAsal: https://example.com/custom/ | aaaaaaaa | bbbbbbbb', 'Halo'];
@@ -71,7 +74,25 @@ try {
     run({message:'Kosong: {utm_campaign}', fallbackEnabled:false, sourceFields:[]}),
     run({message:'Default', enhanceLinks:false, fallbackEnabled:false, sourceFields:[]})
   );
-  document.getElementById('result').textContent = noticeVisible && desktopPosition && mobilePosition && actual.every(function (value, index) { return value === expected[index]; }) ? 'FALLBACK_TEST_PASS' : 'FALLBACK_TEST_FAIL ' + JSON.stringify({actual: actual, expected: expected, noticeVisible: noticeVisible, desktopPosition:desktopPosition, mobilePosition:mobilePosition});
+  var one = {query: '?utm_source=chatgpt.com&email=private%40example.com#details', capture:true};
+  var config = {singleUtmPageEnabled:true, sourceLabel:'CUST_ID', sourceFields:['utm_source','session_id'], recordEndpoint:'/wa-click'};
+  var enabled = run(config, one);
+  var disabled = run(Object.assign({}, config, {singleUtmPageEnabled:false}), one);
+  var payloadStable = enabled.payloads.length === 2 && JSON.stringify(enabled.payloads) === JSON.stringify(disabled.payloads) && enabled.payloads[0].message_source === 'CUST_ID: chatgpt.com+aaaaaaaa';
+  expected.push('Halo\n\nCUST_ID: chatgpt.com+aaaaaaaa\nHalaman: https://example.com/kelas/', 'Halo\n\nCUST_ID: chatgpt.com+aaaaaaaa', 'Halo\n\nCUST_ID: google+aaaaaaaa', 'Halo\n\nSumber: https://example.com/kelas/', 'Halo\n\nHalaman: https://example.com/kelas/', 'Halo\n\nHalaman: https://example.com/kelas/', 'Halo\n\nSumber: session+aaaaaaaa\nHalaman: https://example.com/kelas/', 'Halo\n\nSumber: browser+aaaaaaaa\nHalaman: https://example.com/kelas/', 'Halo\n\nSumber: chatgpt.com+aaaaaaaa\nHalaman: https://example.com/kelas/', 'Halo\n\nSumber: exact\nHalaman: https://example.com/kelas/', 'Pesan lama chatgpt.com\n\nSumber: chatgpt.com+aaaaaaaa\nHalaman: https://example.com/kelas/', 'Akun chatgpt.com\n\nSumber: chatgpt.com+aaaaaaaa\nHalaman: https://example.com/kelas/');
+  actual.push(enabled.text, disabled.text,
+    run(config, {query:'?utm_source=google&utm_medium=cpc&utm_campaign=promo'}),
+    run({singleUtmPageEnabled:true}),
+    run({singleUtmPageEnabled:true, sourceFields:[]}, {query:'?utm_source=chatgpt.com'}),
+    run({singleUtmPageEnabled:true, sourceFields:[], fallbackEnabled:false}, {query:'?utm_source=%20&utm_term=hello'}),
+    run({singleUtmPageEnabled:true, sourceMode:'session'}, {sessionUtm:{utm_source:'session'}, localUtm:{utm_source:'browser',utm_medium:'cpc'}}),
+    run({singleUtmPageEnabled:true}, {sessionUtm:{utm_source:'session',utm_medium:'cpc'}, localUtm:{utm_source:'browser'}}),
+    run({singleUtmPageEnabled:true}, {query:'?utm_source=chatgpt.com',localUtm:{utm_source:'google',utm_medium:'cpc'}}),
+    run({singleUtmPageEnabled:true,sourceFields:['utm_match_type']}, {query:'?utm_matchtype=exact&utm_match_type=exact'}),
+    run({singleUtmPageEnabled:true}, {query:'?utm_source=chatgpt.com',href:'https://wa.me/6200000000001?text=Pesan%20lama%20%7Butm_source%7D'}),
+    run({singleUtmPageEnabled:true, accounts:[{id:1,phone:'6200000000001',message:'Akun {utm_source}'}]}, {query:'?utm_source=chatgpt.com',dataset:{utrAccount:'1'}})
+  );
+  document.getElementById('result').textContent = payloadStable && noticeVisible && desktopPosition && mobilePosition && actual.every(function (value, index) { return value === expected[index]; }) ? 'FALLBACK_TEST_PASS' : 'FALLBACK_TEST_FAIL ' + JSON.stringify({actual: actual, expected: expected, payloadStable:payloadStable, noticeVisible: noticeVisible, desktopPosition:desktopPosition, mobilePosition:mobilePosition});
 } catch (error) { document.getElementById('result').textContent = 'FALLBACK_TEST_FAIL ' + error.message; }
 </script></body></html>
 "@

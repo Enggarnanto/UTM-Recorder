@@ -203,6 +203,7 @@ function utr_wa_save_global() {
 	$separator = isset( $_POST['source_separator'] ) && is_string( $_POST['source_separator'] ) ? wp_check_invalid_utf8( wp_strip_all_tags( wp_unslash( $_POST['source_separator'] ) ), true ) : '+';
 	$separator = preg_replace( '/[\x00-\x1f\x7f]+/', ' ', $separator );
 	$settings['source_separator'] = function_exists( 'mb_substr' ) ? mb_substr( $separator, 0, 20 ) : wp_check_invalid_utf8( substr( $separator, 0, 20 ), true );
+	$settings['single_utm_page_enabled'] = ! empty( $_POST['single_utm_page_enabled'] ) ? 1 : 0;
 	$settings['fallback_enabled'] = ! empty( $_POST['fallback_enabled'] ) ? 1 : 0;
 	$fallback_label = isset( $_POST['fallback_label'] ) && is_string( $_POST['fallback_label'] ) ? utr_clean_value( wp_unslash( $_POST['fallback_label'] ), 50 ) : '';
 	$settings['fallback_label'] = rtrim( $fallback_label, " \t:" ) ?: 'Sumber';
@@ -305,6 +306,8 @@ function utr_render_cta_manager() {
 							<div class="utr-source-choice-grid"><?php foreach ( utr_wa_message_source_choices() as $field => $label ) : ?><label class="utr-switch-row"><input type="checkbox" name="source_fields[]" value="<?php echo esc_attr( $field ); ?>" <?php checked( in_array( $field, $source_fields, true ) ); ?>><span><strong><?php echo esc_html( $label ); ?></strong><small><?php echo esc_html( $field ); ?></small><?php if ( in_array( $field, utr_all_utm_fields(), true ) && ! in_array( $field, $recorded_fields, true ) ) : ?><small class="utr-wa-only-badge">Pesan WA saja · tidak masuk kolom laporan</small><?php endif; ?></span></label><?php endforeach; ?></div>
 						<?php if ( $wa_only_fields ) : ?><p class="utr-setting-note utr-cross-setting-note">Parameter <strong><?php echo esc_html( implode( ', ', $wa_only_fields ) ); ?></strong> akan muncul di pesan WA, tetapi kolom UTM terkait pada laporan tetap kosong. Baris sumber pesan tetap dicatat pada riwayat klik. <a href="<?php echo esc_url( admin_url( 'admin.php?page=utr-settings' ) ); ?>">Ubah UTM laporan</a>.</p><?php endif; ?>
 						<p class="utr-setting-note">ID sesi dan ID browser memakai 8 karakter awal. Jika semua kotak kosong, format UTM tidak ditambahkan; opsi tanpa UTM di bawah tetap dapat menambahkan URL.</p>
+							<label class="utr-switch-row"><input id="utr-single-utm-page-enabled" type="checkbox" name="single_utm_page_enabled" value="1" <?php checked( ! empty( $settings['single_utm_page_enabled'] ) ); ?>><span><strong>Tambahkan URL halaman jika hanya ada satu UTM</strong><small>UTM pada URL diprioritaskan, lalu Local storage atau Sesi aktif. Jumlah dihitung sebelum pilihan nilai pesan diterapkan. URL halaman ditampilkan tanpa parameter dan fragmen, termasuk jika semua pilihan nilai pesan kosong.</small></span></label>
+							<div id="utr-single-utm-page-example" class="utr-message-preview" hidden><strong>Contoh sumber dengan satu UTM: utm_source=chatgpt.com</strong><pre id="utr-single-utm-page-preview" aria-live="polite"></pre></div>
 						</fieldset>
 						<fieldset class="utr-fieldset utr-fallback-format"><legend>Saat tidak ada UTM</legend>
 							<p class="utr-setting-intro">Atur baris sumber pengganti ketika browser pengunjung belum memiliki UTM. Pengaturan ini berlaku untuk tombol akun, shortcode, dan tautan WA yang didukung.</p>

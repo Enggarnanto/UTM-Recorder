@@ -43,6 +43,7 @@ function submit( $handler, $post, $notice ) {
     try { $handler(); throw new RuntimeException('Missing redirect'); }
     catch (TestRedirect $redirect) { check(str_contains($redirect->getMessage(), 'utr_notice=' . $notice), 'Unexpected notice: ' . $redirect->getMessage()); }
 }
+check(utr_whatsapp_settings()['single_utm_page_enabled'] === 0, 'Single UTM page must default to disabled');
 $options['utr_whatsapp_settings'] = array_merge(utr_whatsapp_settings(), array('message'=>'Default lama', 'fallback_enabled'=>1, 'fallback_url_mode'=>'custom', 'fallback_custom_url'=>''));
 submit('utr_wa_save_appearance', array('floating_enabled'=>1, 'greeting'=>"Halo baru!\nPilih admin.", 'panel_title'=>'Konsultasi', 'floating_position'=>'left'), 'appearance_saved');
 $saved = utr_whatsapp_settings();
@@ -50,14 +51,18 @@ check($saved['greeting'] === "Halo baru!\nPilih admin.", 'Greeting not saved');
 check($saved['panel_title'] === 'Konsultasi' && $saved['floating_position'] === 'left', 'Appearance not saved');
 check($saved['message'] === 'Default lama' && $saved['fallback_url_mode'] === 'custom', 'Appearance save changed message settings');
 check($purges === 1, 'Cache purge not dispatched');
-submit('utr_wa_save_global', array('enhance_links'=>1, 'message'=>'Default {utm_source}', 'source_fields'=>array('utm_source','session_id'), 'fallback_enabled'=>0, 'wa_source_mode'=>'session'), 'global_saved');
+submit('utr_wa_save_global', array('enhance_links'=>1, 'message'=>'Default {utm_source}', 'source_fields'=>array('utm_source','session_id'), 'single_utm_page_enabled'=>1, 'fallback_enabled'=>0, 'wa_source_mode'=>'session'), 'global_saved');
 $saved = utr_whatsapp_settings();
+check($saved['single_utm_page_enabled'] === 1, 'Single UTM page setting not enabled');
+submit('utr_wa_save_appearance', array('floating_enabled'=>1, 'greeting'=>"Halo baru!\nPilih admin.", 'panel_title'=>'Konsultasi', 'floating_position'=>'left'), 'appearance_saved');
+check(utr_whatsapp_settings()['single_utm_page_enabled'] === 1, 'Appearance save reset single UTM page setting');
 check($saved['greeting'] === "Halo baru!\nPilih admin." && $saved['floating_enabled'] === 1, 'Message save reset appearance');
 check($saved['message'] === 'Default {utm_source}' && utr_wa_source_mode() === 'session', 'Default message/source mode not saved');
 $before = $saved;
 submit('utr_wa_save_global', array('message'=>'Should not save', 'fallback_enabled'=>1, 'fallback_url_mode'=>'custom', 'fallback_custom_url'=>'invalid'), 'invalid_fallback_url');
 check(utr_whatsapp_settings() === $before, 'Invalid URL partially saved settings');
 submit('utr_wa_save_global', array('greeting'=>"Halo baru!\nPilih admin.", 'floating_enabled'=>1, 'floating_position'=>'right', 'message'=>'Default kanan', 'fallback_enabled'=>0), 'global_saved');
+check(utr_whatsapp_settings()['single_utm_page_enabled'] === 0, 'Unchecked single UTM page setting not disabled');
 check(utr_whatsapp_settings()['floating_position'] === 'right', 'Main save did not switch position to right');
 submit('utr_wa_save_global', array('save_section'=>'appearance', 'greeting'=>"Halo baru!\nPilih admin.", 'floating_enabled'=>1, 'floating_position'=>'left', 'fallback_enabled'=>1, 'fallback_url_mode'=>'custom', 'fallback_custom_url'=>'invalid'), 'appearance_saved');
 check(utr_whatsapp_settings()['floating_position'] === 'left', 'Appearance save did not switch position to left');

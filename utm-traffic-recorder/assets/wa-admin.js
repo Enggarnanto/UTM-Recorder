@@ -55,6 +55,13 @@
       var parts = $('input[name="source_fields[]"]:checked').map(function () { return format(sample[this.value] || ''); }).get();
       var label = ($('#utr-source-label').val() || 'Sumber').trim().replace(/[\s:]+$/, '') || 'Sumber';
       var line = parts.length ? label + ': ' + parts.join($('#utr-source-separator').val()) : '';
+      var singleParts = $('input[name="source_fields[]"]:checked').map(function () {
+        var value = this.value === 'utm_source' ? 'chatgpt.com' : (this.value === 'session_id' || this.value === 'visitor_id' ? sample[this.value] : '');
+        return value ? format(value) : null;
+      }).get();
+      var singleLine = singleParts.length ? label + ': ' + singleParts.join($('#utr-source-separator').val()) : '';
+      $('#utr-single-utm-page-example').prop('hidden', !$('#utr-single-utm-page-enabled').is(':checked'));
+      $('#utr-single-utm-page-preview').text((singleLine ? singleLine + '\n' : '') + 'Halaman: https://example.com/halaman/');
       $('#utr-account-message-preview').text(message + (message && line ? '\n\n' : '') + line);
       var defaultMessage = resolve(($('#utr-global-message').val() || '').trim(), '').trim();
       $('#utr-global-message-preview').text(defaultMessage + (defaultMessage && line ? '\n\n' : '') + line);
@@ -85,7 +92,7 @@
       else field.value = field.value.slice(0, start) + token + field.value.slice(end);
       $(field).trigger('input');
     });
-    $('#utr-source-case, input[name="source_fields[]"], input[name="fallback_id_fields[]"], #utr-fallback-enabled, input[name="fallback_url_mode"]').on('change', updatePreview);
+    $('#utr-source-case, input[name="source_fields[]"], input[name="fallback_id_fields[]"], #utr-fallback-enabled, #utr-single-utm-page-enabled, input[name="fallback_url_mode"]').on('change', updatePreview);
     updatePreview();
 
     function updateFloatingPreview() {

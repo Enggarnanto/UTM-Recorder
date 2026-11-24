@@ -1,6 +1,6 @@
 # Panduan UTM Traffic Recorder
 
-**Versi plugin:** 2.6.16
+**Versi plugin:** 2.6.17
 
 Tampilan dashboard dan CTA mengambang memakai Deep Navy, Electric Blue, dan aksen Electric Lime. Heading menggunakan Sora dan teks menggunakan Plus Jakarta Sans, dengan font sistem sebagai cadangan bila Google Fonts tidak tersedia. Warna akun WhatsApp yang sudah diatur sendiri tetap dipertahankan; warna bawaan akun baru adalah Electric Blue.
 
@@ -11,6 +11,10 @@ Di **CTA WA → Tombol mengambang & tautan WhatsApp → Tampilan tombol floating
 Plugin ini mencatat kunjungan website, parameter UTM, dan klik WhatsApp. Laporannya tersedia di dashboard WordPress. Anda juga bisa membuat satu tombol WhatsApp mengambang yang menampilkan beberapa admin.
 
 ## Mulai cepat
+
+Pada **CTA WA → Format sumber dalam pesan WA**, aktifkan **Tambahkan URL halaman jika hanya ada satu UTM** untuk menambahkan baris `Halaman: https://example.com/halaman/` setelah sumber pesan. Opsi ini nonaktif secara bawaan. URL halaman tidak membawa query parameter atau fragmen; situs yang menentukan halaman melalui query dapat kehilangan detail halaman tersebut.
+
+Jumlah dihitung dari enam UTM yang dikenali dan bernilai tidak kosong, sebelum checkbox nilai pesan diterapkan; ID sesi/browser tidak dihitung. UTM pada URL saat ini diprioritaskan, kemudian Local storage atau Sesi aktif jika URL tidak membawa parameter UTM yang dikenali. Tepat satu UTM menambahkan URL, dua atau lebih tetap memakai format biasa, sedangkan nol UTM mengikuti **Saat tidak ada UTM**. Baris Halaman tetap muncul jika pilihan nilai pesan dikosongkan. Baris tambahan hanya masuk teks WhatsApp; sumber pesan pada riwayat klik, nilai UTM laporan, dan payload sinkronisasi tetap mengikuti mekanisme sebelumnya.
 
 1. Di WordPress, buka **Plugins → Add New → Upload Plugin**. Unggah `utm-traffic-recorder.zip`, lalu pilih **Replace current with uploaded** jika ditawarkan untuk memperbarui versi lama. Aktifkan plugin bila perlu.
 2. Buka **Traffic Recorder → Settings**. Pilih UTM yang ingin dicatat, lalu klik **Simpan pengaturan**. Kelima UTM aktif secara bawaan.

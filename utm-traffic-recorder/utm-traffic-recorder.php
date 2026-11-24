@@ -2,7 +2,7 @@
 /**
  * Plugin Name: UTM Traffic Recorder
  * Description: Records pageviews and UTM parameters, with a private WordPress admin report and CSV export.
- * Version: 2.6.16
+ * Version: 2.6.17
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Plugin URI: https://www.mtalkblog.com
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'UTR_VERSION', '2.6.16' );
+define( 'UTR_VERSION', '2.6.17' );
 define( 'UTR_FILE', __FILE__ );
 require_once __DIR__ . '/includes/activity-log.php';
 require_once __DIR__ . '/includes/wa-core.php';
@@ -646,6 +646,7 @@ function utr_whatsapp_settings() {
 		'source_case'   => 'original',
 		'source_fields' => array( 'utm_source', 'session_id' ),
 		'source_separator' => '+',
+		'single_utm_page_enabled' => 0,
 		'fallback_enabled' => 1,
 		'fallback_label' => 'Sumber',
 		'fallback_url_mode' => 'page',
@@ -764,6 +765,7 @@ function utr_enqueue_whatsapp_assets() {
 		'sourceCase'     => $settings['source_case'],
 		'sourceFields'   => $settings['source_fields'],
 		'sourceSeparator' => $settings['source_separator'],
+		'singleUtmPageEnabled' => ! empty( $settings['single_utm_page_enabled'] ),
 		'fallbackEnabled' => ! empty( $settings['fallback_enabled'] ),
 		'fallbackLabel' => $settings['fallback_label'],
 		'fallbackUrlMode' => $settings['fallback_url_mode'],

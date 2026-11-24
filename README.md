@@ -1,11 +1,11 @@
 # UTM Traffic Recorder
 
-Plugin WordPress untuk mencatat kunjungan, parameter UTM, sesi browser, dan klik CTA WhatsApp. Versi saat ini: **2.6.16**.
+Plugin WordPress untuk mencatat kunjungan, parameter UTM, sesi browser, dan klik CTA WhatsApp. Versi saat ini: **2.6.17**.
 
 ## Isi proyek
 
 - **utm-traffic-recorder/** — kode sumber plugin WordPress.
-- **dist/** — ZIP instalasi hasil build, tidak dimasukkan ke Git. Paket terbaru: `dist/2.6.16/utm-traffic-recorder-2.6.16.zip` atau `dist/utm-traffic-recorder.zip`.
+- **dist/** — ZIP instalasi hasil build, tidak dimasukkan ke Git. Paket terbaru: `dist/2.6.17/utm-traffic-recorder-2.6.17.zip` atau `dist/utm-traffic-recorder.zip`.
 - **integrations/webhook/** — kontrak JSON API netral, skema database, dan contoh receiver PHP/CodeIgniter 3/4 untuk backend apa pun.
 - **integrations/google-sheets/** — receiver Apps Script dan panduan sinkronisasi detail klik WhatsApp dari banyak website.
 - **landing-dokumentasi/** — landing page dokumentasi dan potongan HTML untuk Blogger.
@@ -43,7 +43,7 @@ tools/                 build paket portabel
 dist/                  hasil build lokal, diabaikan Git
 ```
 
-Jalankan `python tools/build-release.py`; upload `dist/utm-traffic-recorder.zip` atau ZIP versi di `dist/2.6.16/`. Arsip keluaran tidak dimasukkan ke Git. Arsip lokal lama dipertahankan di `dist/archive/`. `.gitignore` mengecualikan build, ZIP, log, cache, dependensi lokal, dan kredensial; `.gitattributes` menyeragamkan akhir baris file sumber. File `.env.example` tetap boleh dilacak. Penghapusan arsip dari indeks Git tidak menulis ulang riwayat commit lama.
+Jalankan `python tools/build-release.py`; upload `dist/utm-traffic-recorder.zip` atau ZIP versi di `dist/2.6.17/`. Arsip keluaran tidak dimasukkan ke Git. Arsip lokal lama dipertahankan di `dist/archive/`. `.gitignore` mengecualikan build, ZIP, log, cache, dependensi lokal, dan kredensial; `.gitattributes` menyeragamkan akhir baris file sumber. File `.env.example` tetap boleh dilacak. Penghapusan arsip dari indeks Git tidak menulis ulang riwayat commit lama.
 
 ## Penulis dan lisensi
 

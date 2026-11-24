@@ -3,11 +3,14 @@ Contributors: galih
 Tags: utm, analytics, traffic, campaign, tracking
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 2.6.16
+Stable tag: 2.6.17
 License: GPLv2 or later
 
 Records pageviews, UTM parameters, and WhatsApp CTA clicks in your WordPress database.
 Panduan penggunaan lengkap berbahasa Indonesia tersedia di DOKUMENTASI.md dalam paket plugin.
+
+== Single-UTM page URL ==
+Version 2.6.17 adds an optional CTA WA setting to append a separate Halaman line when exactly one recognized UTM has a nonempty value. Disabled by default. The current page URL excludes query parameters and fragments. The UTM count is evaluated before message-field checkboxes. Structured UTM reporting, stored message_source, and Sheets/Webhook payloads keep their existing behavior.
 
 == Installation ==
 1. Upload the `utm-traffic-recorder` folder or its ZIP through Plugins > Add New > Upload Plugin.

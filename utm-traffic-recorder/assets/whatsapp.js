@@ -202,7 +202,16 @@
     var message = messageParagraphs(hasExistingMessage ? existing : configuredMessage(link, account));
     message = resolveMessageVariables(message, account).trim();
     var line = sourceLine();
-    var finalMessage = message + (message && line ? '\n\n' : '') + line;
+    var utm = currentUtm(config.sourceMode === 'session' ? 'session' : 'local');
+    var pageLine = '';
+    if (config.singleUtmPageEnabled === true && allFields.filter(function (field) { return !!utm[field]; }).length === 1) {
+      var page = new URL(window.location.href);
+      page.search = '';
+      page.hash = '';
+      pageLine = 'Halaman: ' + page.href;
+    }
+    var suffix = [line, pageLine].filter(function (value) { return !!value; }).join('\n');
+    var finalMessage = message + (message && suffix ? '\n\n' : '') + suffix;
     if (finalMessage) url.searchParams.set('text', finalMessage);
     else url.searchParams.delete('text');
     var generated = url.href;
